@@ -1,0 +1,33 @@
+---
+title: "2025 Sturgeon Tagging Encounter Form"
+author: "Sander Elliott"
+format: pdf
+editor: visual
+---
+
+## Load Packages
+
+```{r warning=FALSE}
+library(dplyr)
+```
+
+## Import tagging sheets
+
+```{r}
+day1 <- read.csv("data/trip_1.csv", na.strings = "")
+day2 <- read.csv("data/trip_2.csv", na.strings = "")
+day3 <- read.csv("data/trip_3.csv", na.strings = "")
+day4 <- read.csv("data/trip_4.csv", na.strings = "")
+day5 <- read.csv("data/trip_5.csv", na.strings = "")
+head(day1)
+head(day2)
+head(day3)
+head(day4)
+head(day5)
+```
+
+
+
+
+
+
