@@ -1,0 +1,233 @@
+---
+title: "Sturgeon TidBits Encounter Form QAQC"
+author: "Sander Elliott"
+format: pdf
+editor: visual
+---
+
+### Packages
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(sf)
+library(ggspatial)
+```
+
+# Load Data and Check Characteristics
+
+```{r}
+enc <- read.csv("2025/data/UEF_AST_SNS_SE.csv")
+glimpse(enc)
+```
+
+## Separate Acoustic and Pit
+
+```{r}
+enc_ac <- enc %>% 
+  filter(TagType == "Acoustic")
+
+enc_PIT <- enc %>% 
+  filter(TagType == "PIT")
+
+### confirm dim rows numbers with tagging records
+dim(enc_ac)
+dim(enc_PIT)
+```
+
+# Acoustic QAQC
+
+I will look at fish size, capture locations and species in PIT as it contains all the fish. I just want to check that the values for the acoustic tag column make sense
+
+```{r}
+acvalues <- enc_ac %>%
+  summarise(across(
+    c(TagType, TagManufacturer, TagModel, TagSerialNumber, EstTagLife,
+      Acoustic_ID, Acoustic_Sensor_type, Acoustic_.Sensor_idcode,
+      Acoustic_Sensor_value, PIT_ID, Radio_Freq),
+    ~ list(unique(.))))
+
+str(acvalues)
+acvalues$TagSerialNumber
+acvalues$Acoustic_ID
+
+acN <- enc_ac %>% 
+  summarise(fish = n(),
+            tags = n_distinct(Acoustic_ID))
+acN
+
+```
+
+## Make Fixes
+
+PIT should be NA not ""
+
+```{r}
+enc_ac1 <- enc_ac %>% 
+  mutate(PIT_ID = NA_character_)
+unique(enc_ac1$PIT_ID)
+```
+
+# PIT QAQC
+
+## PIT Tags
+
+```{r}
+PITvalues <- enc_PIT %>%
+  summarise(across(
+    c(TagType, TagManufacturer, TagModel, TagSerialNumber, EstTagLife,
+      Acoustic_ID, Acoustic_Sensor_type, Acoustic_.Sensor_idcode,
+      Acoustic_Sensor_value, PIT_ID, Radio_Freq),
+    ~ list(unique(.))))
+
+PitN <- enc_PIT %>% 
+  summarise(fish = n(),
+            tags = n_distinct(PIT_ID))
+
+PitN
+
+str(PITvalues)
+PITvalues$PIT_ID
+```
+
+### Fix PIT tags
+
+I have less pit tags than fish. this makes sense, but I should check that there are *two* within year recaps
+
+```{r}
+Recap_PIT <- enc_PIT %>% 
+  group_by(PIT_ID) %>% 
+  summarise(n_caps = n()) %>% 
+  filter(n_caps > 1)
+Recap_PIT
+```
+
+## Size QAQC
+
+```{r}
+sumsz <- enc_PIT %>% 
+  group_by(Species, System) %>% 
+  summarise(n_captures = n(),
+            min_FL = min(ForkLength..cm.),
+            max_FL = max(ForkLength..cm.),
+            range_FL = max(ForkLength..cm.) - min(ForkLength..cm.),
+            min_TL = min(TotalLength..cm.),
+            max_TL = max(TotalLength..cm.),
+            range_TL = max(TotalLength..cm.) - min(TotalLength..cm.))
+sumsz
+```
+
+### Fix Size
+
+Check tag sheet on AST with FL = 1
+
+```{r}
+wrong_FL <- enc %>% 
+  filter(ForkLength..cm.< 2)
+wrong_FL
+## supposed to be 109
+enc_PIT1 <- enc_PIT %>% 
+  mutate(ForkLength..cm. = case_when(ForkLength..cm. == 1 ~ 109,
+                                     TRUE ~ ForkLength..cm.))
+
+sumsz1 <- enc_PIT1 %>% 
+  group_by(Species, System) %>% 
+  summarise(n_captures = n(),
+            min_FL = min(ForkLength..cm.),
+            max_FL = max(ForkLength..cm.),
+            range_FL = max(ForkLength..cm.) - min(ForkLength..cm.),
+            min_TL = min(TotalLength..cm.),
+            max_TL = max(TotalLength..cm.),
+            range_TL = max(TotalLength..cm.) - min(TotalLength..cm.))
+sumsz1
+enc_ac2 <- enc_ac1 %>% 
+  mutate(ForkLength..cm. = case_when(ForkLength..cm. == 1 ~ 109,
+                                     TRUE ~ ForkLength..cm.))
+```
+
+## Interobital to Mouth
+
+check ratios of IO to Mouth **AST < 0.55; SNS > 0.55**
+
+```{r}
+
+PITioRatio <- enc_PIT1 %>%
+  mutate(ratio = `STRG_InsideMouth.mm.` / `STRG_Interorbital.mm.`) %>%
+  filter(!is.na(ratio), is.finite(ratio)) %>% 
+  group_by(Species) %>% 
+  summarise(min = min(ratio),
+            max = max(ratio))
+
+PITioRatio
+
+```
+
+# Map Locations
+
+```{r}
+PITloc_sf <- enc_PIT1 %>%
+  st_as_sf(coords = c("Encounter_Easting", "Encounter_Northing"), crs = 26919) %>%
+  st_transform(crs = 4326)  # Convert to lat/lon
+
+# Convert back to dataframe for faster plotting
+PITloc_df <- PITloc_sf %>%
+  mutate(Longitude = st_coordinates(.)[,1], Latitude = st_coordinates(.)[,2]) %>%
+  as.data.frame()
+head(PITloc_df)
+
+
+# Plot without background map first
+
+ggplot(data = PITloc_df) +
+  geom_point(aes(x = Longitude, y = Latitude), size = 2, alpha = 0.7) +
+  theme_minimal() 
+
+ggplot(data = PITloc_df) +
+  annotation_map_tile(type = "cartolight", zoom = 12) +  
+  geom_point(aes(x = Longitude, y = Latitude), size = 2, alpha = 0.7) +
+  coord_sf(crs = 4326, 
+           xlim = c(min(PITloc_df$Longitude) - 0.15, 
+                    max(PITloc_df$Longitude) + 0.15),
+           ylim = c(min(PITloc_df$Latitude) - 0.05,  
+                    max(PITloc_df$Latitude) + 0.05),
+           expand = FALSE)  +
+  theme_minimal()
+```
+
+
+# Recombine Fixed PIT and ac Data
+
+```{r}
+encClean <- rbind(enc_ac2, enc_PIT1)
+glimpse(encClean)
+```
+
+## Output csv
+
+```{r}
+write.csv(encClean, "2025/output/UEF_AST_SNS_SE.csv", na = "", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
