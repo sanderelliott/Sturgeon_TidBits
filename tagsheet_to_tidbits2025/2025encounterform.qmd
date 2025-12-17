@@ -9,6 +9,8 @@ editor: visual
 
 ```{r warning=FALSE}
 library(dplyr)
+library(tidyr)
+library(lubridate)
 ```
 
 ## Import tagging sheets
@@ -26,8 +28,204 @@ head(day4)
 head(day5)
 ```
 
+## Combine to One Sheet
+
+### Prep for TidBits
+
+```{r}
+
+PrepTid <- function(DAY){
+  DAY %>% 
+  filter(! is.na(Fish..)) %>% 
+  fill(Date, River, Site, Easting, Northing, .direction = "down") %>% 
+  rename(FISH = Fish..,
+         CLIP = Clip..) %>% 
+  unite("Notes", Notes, Notes.1, sep = " ", na.rm = TRUE) %>% 
+  select(! c(X.1, X, Determined.Species, PIT..))
+}
+
+day1c <- PrepTid(day1)
+day2c <- PrepTid(day2)
+day3c <- PrepTid(day3)
+day4c <- PrepTid(day4)
+day5c <- PrepTid(day5)
+```
+
+### Combine
+
+```{r}
+alldays <- rbind(day1c, day2c, day3c, day4c, day5c)
+glimpse(alldays)
+```
+
+## Summary Stats
+
+```{r}
+szsum25 <- alldays %>% 
+  group_by(Species, River) %>% 
+  summarise(mean_FL= mean(FL),
+            sd_FL = sd(FL),
+            range_FL = max(FL) - min(FL))
+szsum25
+
+sum25 <- alldays %>% 
+  group_by(Species, River) %>% 
+  summarise(n_captures = n(),
+            n_ac_tag = sum(!is.na(V16.Short)),
+            mean_FL= mean(FL),
+            sd_FL = sd(FL),
+            range_FL = max(FL) - min(FL))
+sum25
+          
+```
+
+## Make Encounter Form
+
+### Check for wierd notes
+
+```{r}
+unique(alldays$Notes)
+alldaysc <- alldays %>%
+  mutate(Notes = case_when(Notes %in% c("", 
+                                        "Stayed at surface post release", 
+                                        "JOE THINKS ITS UGLY", 
+                                        "UMAINE RECAP", 
+                                        "UMAINE RECAPTURE",
+                                        "SEAL AT END OF DAY", 
+                                        "NO AC TAG") ~ NA_character_,
+                           Notes == "UMAINE RECAP / GIRTH 78CM" ~ "GIRTH 78CM",
+                           TRUE ~ Notes))
+unique(alldaysc$Notes)
+```
+
+### Example Encounter Form
+
+```{r}
+tidex <- read.csv("data/TidEncEx.csv")
+names(tidex)
+```
+
+### Change Values & add ac serial number
+
+```{r}
+unique(alldaysc$Recap)
+unique(alldaysc$Date)
+alldaysr <- alldaysc %>% 
+  mutate(Recap = case_when(Recap == "N" ~ "Intial capture",
+                           Recap == "Y" ~ "Recapture"),
+         Date = mdy_hm(paste(Date, "0:00")))
+```
+
+### Make Form Acoustic
+
+```{r}
+tidnames <- names(tidex)
 
 
+tid25ac <- alldaysr %>%
+  transmute(
+    Event = Recap,
+    Species = Species,
+    Rearing_Origin = "Wild",
+    Stage = "Adult",
+    System = River,
+    Encounter_Time_zone = "Eastern",
+    Encounter_Timestamp = Date,
+    Encounter_Location = Site,
+    Encounter_Easting  = Easting,
+    Encounter_Northing = Northing,
+    Encounter_UTMZone  = "19",
+    Encounter_Disposition = "Live",
+    Release_Status = "Yes",
+    Release_Timezone = "Eastern",
+    Release_Timestamp = Date,
+    Release_Location = Site,
+    Release_Easting = Easting,
+    Release_Northing = Northing,
+    TagType = "Acoustic",
+    TagManufacturer = "Innovosea",
+    TagModel = "V16-4x-BLU-1",
+    TagSerialNumber = "",
+    EstTagLife = "2560",
+    Acoustic_ID = V16.CODE.Full,
+    Acoustic_Sensor_type = NA,
+    Acoustic_.Sensor_idcode = NA,
+    Acoustic_Sensor_value = NA,
+    PIT_ID = NA,
+    Radio_ID = NA,
+    Radio_Freq = NA,
+    Radio_BurstRate = NA,
+    External_TagID = NA,
+    Mark.Observed = "None",
+    Mark.Applied = "None",
+    VIE = "None",
+    ForkLength..cm. = FL,
+    TotalLength..cm. = TL,
+    Mass..g. = NA,
+    Sex = Sex,
+    STRG_Interorbital.mm. = Interorbital,
+    STRG_InsideMouth.mm.  = Inside.Mouth,
+    STRG_OutsideMouth.mm. = Outside.Mouth,
+    Notes = Notes,
+    Operator.s. = "JZ,SE")
 
+```
 
+### Make form PIT
 
+```{r}
+
+tid25PIT <- alldaysr %>%
+  transmute(
+    Event = Recap,
+    Species = Species,
+    Rearing_Origin = "Wild",
+    Stage = "Adult",
+    System = River,
+    Encounter_Time_zone = "Eastern",
+    Encounter_Timestamp = Date,
+    Encounter_Location = Site,
+    Encounter_Easting  = Easting,
+    Encounter_Northing = Northing,
+    Encounter_UTMZone  = "19",
+    Encounter_Disposition = "Live",
+    Release_Status = "Yes",
+    Release_Timezone = "Eastern",
+    Release_Timestamp = Date,
+    Release_Location = Site,
+    Release_Easting = Easting,
+    Release_Northing = Northing,
+    TagType = "PIT",
+    TagManufacturer = NA,
+    TagModel = NA,
+    TagSerialNumber = NA,
+    EstTagLife = NA,
+    Acoustic_ID = NA,
+    Acoustic_Sensor_type = NA,
+    Acoustic_.Sensor_idcode = NA,
+    Acoustic_Sensor_value = NA,
+    PIT_ID = PIT.CODE,
+    Radio_ID = NA,
+    Radio_Freq = NA,
+    Radio_BurstRate = NA,
+    External_TagID = NA,
+    Mark.Observed = "None",
+    Mark.Applied = "None",
+    VIE = "None",
+    ForkLength..cm. = FL,
+    TotalLength..cm. = TL,
+    Mass..g. = NA,
+    Sex = Sex,
+    STRG_Interorbital.mm. = Interorbital,
+    STRG_InsideMouth.mm.  = Inside.Mouth,
+    STRG_OutsideMouth.mm. = Outside.Mouth,
+    Notes = Notes,
+    Operator.s. = "JZ,SE")
+```
+
+### Combine
+
+```{r}
+tid25stg <- rbind(tid25ac, tid25PIT)
+glimpse(tid25stg)
+```
