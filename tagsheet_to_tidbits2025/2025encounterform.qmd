@@ -108,12 +108,20 @@ names(tidex)
 ### Change Values & add ac serial number
 
 ```{r}
+serial <- read.csv("data/serialN.csv")
+
 unique(alldaysc$Recap)
 unique(alldaysc$Date)
+
 alldaysr <- alldaysc %>% 
+  full_join(serial, by = "V16.CODE.Full") %>% 
   mutate(Recap = case_when(Recap == "N" ~ "Intial capture",
                            Recap == "Y" ~ "Recapture"),
-         Date = mdy_hm(paste(Date, "0:00")))
+         Sex = case_when(Sex == "U" ~ NA_character_,
+                         TRUE ~ Sex),
+         Date = mdy_hm(paste(Date, "0:00")),
+         Date = format(Date, "%m/%d/%Y %H:%M"))
+head(alldaysr)
 ```
 
 ### Make Form Acoustic
@@ -123,11 +131,12 @@ tidnames <- names(tidex)
 
 
 tid25ac <- alldaysr %>%
+  filter(! is.na(V16.Short)) %>% 
   transmute(
     Event = Recap,
     Species = Species,
     Rearing_Origin = "Wild",
-    Stage = "Adult",
+    Stage = NA,
     System = River,
     Encounter_Time_zone = "Eastern",
     Encounter_Timestamp = Date,
@@ -145,7 +154,7 @@ tid25ac <- alldaysr %>%
     TagType = "Acoustic",
     TagManufacturer = "Innovosea",
     TagModel = "V16-4x-BLU-1",
-    TagSerialNumber = "",
+    TagSerialNumber = Serial_N,
     EstTagLife = "2560",
     Acoustic_ID = V16.CODE.Full,
     Acoustic_Sensor_type = NA,
@@ -180,7 +189,7 @@ tid25PIT <- alldaysr %>%
     Event = Recap,
     Species = Species,
     Rearing_Origin = "Wild",
-    Stage = "Adult",
+    Stage = NA,
     System = River,
     Encounter_Time_zone = "Eastern",
     Encounter_Timestamp = Date,
@@ -229,3 +238,9 @@ tid25PIT <- alldaysr %>%
 tid25stg <- rbind(tid25ac, tid25PIT)
 glimpse(tid25stg)
 ```
+
+## Save CSV
+```{r}
+write.csv(tid25stg, "output/UEF_AST_SNS_SE.csv", na = "", row.names = FALSE)
+```
+
