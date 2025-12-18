@@ -17,22 +17,10 @@ library(ggspatial)
 # Load Data and Check Characteristics
 
 ```{r}
-enc <- read.csv("2025/data/UEF_AST_SNS_SE.csv")
-glimpse(enc)
-```
-
-## Separate Acoustic and Pit
-
-```{r}
-enc_ac <- enc %>% 
-  filter(TagType == "Acoustic")
-
-enc_PIT <- enc %>% 
-  filter(TagType == "PIT")
-
-### confirm dim rows numbers with tagging records
-dim(enc_ac)
-dim(enc_PIT)
+enc_IC <- read.csv("2025/data/UEF_IC_AST_SNS_SE_RAW.csv")
+enc_RCNT <- read.csv("2025/data/UEF_RCNT_AST_SNS_SE_RAW.csv")
+glimpse(enc_IC)
+glimpse(enc_RCNT)
 ```
 
 # Acoustic QAQC
@@ -40,21 +28,22 @@ dim(enc_PIT)
 I will look at fish size, capture locations and species in PIT as it contains all the fish. I just want to check that the values for the acoustic tag column make sense
 
 ```{r}
-acvalues <- enc_ac %>%
+ICvalues <- enc_IC %>%
   summarise(across(
     c(TagType, TagManufacturer, TagModel, TagSerialNumber, EstTagLife,
       Acoustic_ID, Acoustic_Sensor_type, Acoustic_.Sensor_idcode,
       Acoustic_Sensor_value, PIT_ID, Radio_Freq),
     ~ list(unique(.))))
 
-str(acvalues)
-acvalues$TagSerialNumber
-acvalues$Acoustic_ID
+str(ICvalues)
+ICvalues$TagSerialNumber
+ICvalues$Acoustic_ID
 
-acN <- enc_ac %>% 
+IC_acN <- enc_IC %>% 
+  filter(!is.na(Acoustic_ID)) %>% 
   summarise(fish = n(),
             tags = n_distinct(Acoustic_ID))
-acN
+IC_acN ### WRONG
 
 ```
 
