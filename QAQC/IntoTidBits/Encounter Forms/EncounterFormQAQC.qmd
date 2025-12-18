@@ -17,15 +17,15 @@ library(ggspatial)
 # Load Data and Check Characteristics
 
 ```{r}
-enc_IC <- read.csv("2025/data/UEF_IC_AST_SNS_SE_RAW.csv")
-enc_RCNT <- read.csv("2025/data/UEF_RCNT_AST_SNS_SE_RAW.csv")
+enc_IC <- read.csv("2025/tagsheet_to_tidbits2025/output/UEF_IC_AST_SNS_SE_RAW.csv", 
+                   na.strings = "")
+enc_RCNT <- read.csv("2025/tagsheet_to_tidbits2025/output/UEF_RCNT_AST_SNS_SE_RAW.csv", 
+                     na.strings = "")
 glimpse(enc_IC)
 glimpse(enc_RCNT)
 ```
 
-# Acoustic QAQC
-
-I will look at fish size, capture locations and species in PIT as it contains all the fish. I just want to check that the values for the acoustic tag column make sense
+# Initial Capture QAQC
 
 ```{r}
 ICvalues <- enc_IC %>%
@@ -40,61 +40,38 @@ ICvalues$TagSerialNumber
 ICvalues$Acoustic_ID
 
 IC_acN <- enc_IC %>% 
-  filter(!is.na(Acoustic_ID)) %>% 
   summarise(fish = n(),
-            tags = n_distinct(Acoustic_ID))
-IC_acN ### WRONG
+            tags = n_distinct(Acoustic_ID, na.rm = TRUE))
+IC_acN 
 
 ```
 
-## Make Fixes
-
-PIT should be NA not ""
+## Recapture NT QAQC
 
 ```{r}
-enc_ac1 <- enc_ac %>% 
-  mutate(PIT_ID = NA_character_)
-unique(enc_ac1$PIT_ID)
-```
-
-# PIT QAQC
-
-## PIT Tags
-
-```{r}
-PITvalues <- enc_PIT %>%
+RCNTvalues <- enc_RCNT %>%
   summarise(across(
     c(TagType, TagManufacturer, TagModel, TagSerialNumber, EstTagLife,
       Acoustic_ID, Acoustic_Sensor_type, Acoustic_.Sensor_idcode,
       Acoustic_Sensor_value, PIT_ID, Radio_Freq),
     ~ list(unique(.))))
 
-PitN <- enc_PIT %>% 
+str(RCNTvalues)
+RCNTvalues$TagSerialNumber
+RCNTvalues$Acoustic_ID
+
+RCNT_acN <- enc_RCNT %>% 
   summarise(fish = n(),
-            tags = n_distinct(PIT_ID))
-
-PitN
-
-str(PITvalues)
-PITvalues$PIT_ID
+            tags = n_distinct(Acoustic_ID, na.rm = TRUE))
+RCNT_acN 
 ```
 
-### Fix PIT tags
-
-I have less pit tags than fish. this makes sense, but I should check that there are *two* within year recaps
-
-```{r}
-Recap_PIT <- enc_PIT %>% 
-  group_by(PIT_ID) %>% 
-  summarise(n_caps = n()) %>% 
-  filter(n_caps > 1)
-Recap_PIT
-```
+**Make sure fish and tags between sets add up**
 
 ## Size QAQC
 
 ```{r}
-sumsz <- enc_PIT %>% 
+sumszIC <- enc_IC %>% 
   group_by(Species, System) %>% 
   summarise(n_captures = n(),
             min_FL = min(ForkLength..cm.),
@@ -103,7 +80,17 @@ sumsz <- enc_PIT %>%
             min_TL = min(TotalLength..cm.),
             max_TL = max(TotalLength..cm.),
             range_TL = max(TotalLength..cm.) - min(TotalLength..cm.))
-sumsz
+sumszIC
+sumszRCNT <- enc_RCNT %>% 
+  group_by(Species, System) %>% 
+  summarise(n_captures = n(),
+            min_FL = min(ForkLength..cm.),
+            max_FL = max(ForkLength..cm.),
+            range_FL = max(ForkLength..cm.) - min(ForkLength..cm.),
+            min_TL = min(TotalLength..cm.),
+            max_TL = max(TotalLength..cm.),
+            range_TL = max(TotalLength..cm.) - min(TotalLength..cm.))
+sumszRCNT
 ```
 
 ### Fix Size
@@ -111,15 +98,15 @@ sumsz
 Check tag sheet on AST with FL = 1
 
 ```{r}
-wrong_FL <- enc %>% 
+wrong_FL <- enc_IC %>% 
   filter(ForkLength..cm.< 2)
 wrong_FL
 ## supposed to be 109
-enc_PIT1 <- enc_PIT %>% 
+enc_IC1 <- enc_IC %>% 
   mutate(ForkLength..cm. = case_when(ForkLength..cm. == 1 ~ 109,
                                      TRUE ~ ForkLength..cm.))
 
-sumsz1 <- enc_PIT1 %>% 
+sumszIC1 <- enc_IC1 %>% 
   group_by(Species, System) %>% 
   summarise(n_captures = n(),
             min_FL = min(ForkLength..cm.),
@@ -128,10 +115,7 @@ sumsz1 <- enc_PIT1 %>%
             min_TL = min(TotalLength..cm.),
             max_TL = max(TotalLength..cm.),
             range_TL = max(TotalLength..cm.) - min(TotalLength..cm.))
-sumsz1
-enc_ac2 <- enc_ac1 %>% 
-  mutate(ForkLength..cm. = case_when(ForkLength..cm. == 1 ~ 109,
-                                     TRUE ~ ForkLength..cm.))
+sumszIC1
 ```
 
 ## Interobital to Mouth
@@ -140,61 +124,101 @@ check ratios of IO to Mouth **AST < 0.55; SNS > 0.55**
 
 ```{r}
 
-PITioRatio <- enc_PIT1 %>%
+ICioRatio <- enc_IC1 %>%
   mutate(ratio = `STRG_InsideMouth.mm.` / `STRG_Interorbital.mm.`) %>%
   filter(!is.na(ratio), is.finite(ratio)) %>% 
   group_by(Species) %>% 
   summarise(min = min(ratio),
             max = max(ratio))
 
-PITioRatio
+ICioRatio
+
+RCNTioRatio <- enc_IC1 %>%
+  mutate(ratio = `STRG_InsideMouth.mm.` / `STRG_Interorbital.mm.`) %>%
+  filter(!is.na(ratio), is.finite(ratio)) %>% 
+  group_by(Species) %>% 
+  summarise(min = min(ratio),
+            max = max(ratio))
+
+RCNTioRatio
 
 ```
 
 # Map Locations
 
 ```{r}
-PITloc_sf <- enc_PIT1 %>%
-  st_as_sf(coords = c("Encounter_Easting", "Encounter_Northing"), crs = 26919) %>%
-  st_transform(crs = 4326)  # Convert to lat/lon
 
-# Convert back to dataframe for faster plotting
-PITloc_df <- PITloc_sf %>%
+## IC
+
+ICloc_sf <- enc_IC1 %>%
+  st_as_sf(coords = c("Encounter_Easting", "Encounter_Northing"), crs = 26919) %>%
+  st_transform(crs = 4326) 
+
+ICloc_df <- ICloc_sf %>%
   mutate(Longitude = st_coordinates(.)[,1], Latitude = st_coordinates(.)[,2]) %>%
   as.data.frame()
-head(PITloc_df)
 
-
-# Plot without background map first
-
-ggplot(data = PITloc_df) +
-  geom_point(aes(x = Longitude, y = Latitude), size = 2, alpha = 0.7) +
+ggplot(data = ICloc_df) +
+  geom_point(aes(x = Longitude, 
+                 y = Latitude, 
+                 color = Release_Location), 
+             size = 2, alpha = 0.7) +
   theme_minimal() 
 
-ggplot(data = PITloc_df) +
+
+ggplot(data = ICloc_df) +
   annotation_map_tile(type = "cartolight", zoom = 12) +  
-  geom_point(aes(x = Longitude, y = Latitude), size = 2, alpha = 0.7) +
+  geom_point(aes(x = Longitude, y = Latitude, color = Release_Location),
+             size = 2, alpha = 0.7) +
   coord_sf(crs = 4326, 
-           xlim = c(min(PITloc_df$Longitude) - 0.15, 
-                    max(PITloc_df$Longitude) + 0.15),
-           ylim = c(min(PITloc_df$Latitude) - 0.05,  
-                    max(PITloc_df$Latitude) + 0.05),
+           xlim = c(min(ICloc_df$Longitude) - 0.15, 
+                    max(ICloc_df$Longitude) + 0.15),
+           ylim = c(min(ICloc_df$Latitude) - 0.05,  
+                    max(ICloc_df$Latitude) + 0.05),
            expand = FALSE)  +
+  labs(title = "IC")+
+  theme_minimal()
+
+## RCNT
+
+RCNTloc_sf <- enc_RCNT %>%
+  st_as_sf(coords = c("Encounter_Easting", "Encounter_Northing"), crs = 26919) %>%
+  st_transform(crs = 4326)  
+
+RCNTloc_df <- RCNTloc_sf %>%
+  mutate(Longitude = st_coordinates(.)[,1], Latitude = st_coordinates(.)[,2]) %>%
+  as.data.frame()
+
+
+ggplot(data = RCNTloc_df) +
+  geom_point(aes(x = Longitude, 
+                 y = Latitude, 
+                 color = Release_Location), 
+             size = 2, alpha = 0.7) +
+  theme_minimal() 
+
+
+ggplot(data = RCNTloc_df) +
+  annotation_map_tile(type = "cartolight", zoom = 12) +  
+  geom_point(aes(x = Longitude, y = Latitude, color = Release_Location),
+             size = 2, alpha = 0.7) +
+  coord_sf(crs = 4326, 
+           xlim = c(min(RCNTloc_df$Longitude) - 0.15, 
+                    max(RCNTloc_df$Longitude) + 0.15),
+           ylim = c(min(RCNTloc_df$Latitude) - 0.05,  
+                    max(RCNTloc_df$Latitude) + 0.05),
+           expand = FALSE)  +
+  labs(title = "RCNT")+
   theme_minimal()
 ```
 
 
-# Recombine Fixed PIT and ac Data
-
-```{r}
-encClean <- rbind(enc_ac2, enc_PIT1)
-glimpse(encClean)
-```
 
 ## Output csv
 
 ```{r}
-write.csv(encClean, "2025/output/UEF_AST_SNS_SE.csv", na = "", row.names = FALSE)
+write.csv(enc_IC1, "2025/output/UEF_IC_AST_SNS_SE.csv", na = "", row.names = FALSE)
+write.csv(enc_RCNT, "2025/output/UEF_RCNT_AST_SNS_SE.csv", na = "", row.names = FALSE)
 ```
 
 

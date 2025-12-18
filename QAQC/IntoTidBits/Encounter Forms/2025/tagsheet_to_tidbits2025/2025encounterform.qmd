@@ -142,8 +142,9 @@ recaps
 tidnames <- names(tidex)
 
 
-tid25ic <- alldaysr %>%
-  filter(event == "Initial capture") %>% 
+tid25icmult <- alldaysr %>%
+  filter(event == "Initial capture",
+         tagtype == "Multiple") %>% 
   transmute(
     Event = event,
     Species = Species,
@@ -163,7 +164,7 @@ tid25ic <- alldaysr %>%
     Release_Location = Site,
     Release_Easting = Easting,
     Release_Northing = Northing,
-    TagType = "Multiple",
+    TagType = tagtype,
     TagManufacturer = "Innovosea",
     TagModel = "V16-4x-BLU-1",
     TagSerialNumber = Serial_N,
@@ -190,13 +191,65 @@ tid25ic <- alldaysr %>%
     Notes = Notes,
     Operator.s. = "JZ,SE")
 
+tid25icpit <- alldaysr %>%
+  filter(event == "Initial capture",
+         tagtype == "PIT") %>% 
+  transmute(
+    Event = event,
+    Species = Species,
+    Rearing_Origin = "Wild",
+    Stage = NA,
+    System = River,
+    Encounter_Time_zone = "Eastern",
+    Encounter_Timestamp = Date,
+    Encounter_Location = Site,
+    Encounter_Easting  = Easting,
+    Encounter_Northing = Northing,
+    Encounter_UTMZone  = "19",
+    Encounter_Disposition = "Live",
+    Release_Status = "Yes",
+    Release_Timezone = "Eastern",
+    Release_Timestamp = Date,
+    Release_Location = Site,
+    Release_Easting = Easting,
+    Release_Northing = Northing,
+    TagType = tagtype,
+    TagManufacturer = NA,
+    TagModel = NA,
+    TagSerialNumber = NA,
+    EstTagLife = NA,
+    Acoustic_ID = NA,
+    Acoustic_Sensor_type = NA,
+    Acoustic_.Sensor_idcode = NA,
+    Acoustic_Sensor_value = NA,
+    PIT_ID = PIT.CODE,
+    Radio_ID = NA,
+    Radio_Freq = NA,
+    Radio_BurstRate = NA,
+    External_TagID = NA,
+    Mark.Observed = "None",
+    Mark.Applied = "None",
+    VIE = "None",
+    ForkLength..cm. = FL,
+    TotalLength..cm. = TL,
+    Mass..g. = NA,
+    Sex = Sex,
+    STRG_Interorbital.mm. = Interorbital,
+    STRG_InsideMouth.mm.  = Inside.Mouth,
+    STRG_OutsideMouth.mm. = Outside.Mouth,
+    Notes = Notes,
+    Operator.s. = "JZ,SE")
+
+tid25ic <- rbind(tid25icmult, tid25icpit)
+
 ```
 
 ### Recapture
 
 ```{r}
-tid25rcnt <- alldaysr %>%
-  filter(event != "Initial capture") %>%
+tid25rcntmult <- alldaysr %>%
+  filter(event != "Initial capture",
+         tagtype == "Multiple") %>%
   transmute(
     Event = event,
     Species = Species,
@@ -224,7 +277,7 @@ tid25rcnt <- alldaysr %>%
     Observed_Radio_ID = NA,
     Observed_External_TagID = NA,
     
-    TagType = "Multiple",
+    TagType = tagtype,
     TagManufacturer = "Innovosea",
     TagModel = "V16-4x-BLU-1",
     TagSerialNumber = Serial_N,
@@ -257,6 +310,70 @@ tid25rcnt <- alldaysr %>%
     `Operator(s)` = "JZ,SE"
   )
 
+tid25rcntpit <- alldaysr %>%
+  filter(event != "Initial capture",
+         tagtype == "PIT") %>%
+  transmute(
+    Event = event,
+    Species = Species,
+    Rearing_Origin = "Wild",
+    Stage = NA,
+    System = River,
+    
+    Encounter_Time_zone = "Eastern",
+    Encounter_Timestamp = Date,
+    Encounter_Location = Site,
+    Encounter_Easting = Easting,
+    Encounter_Northing = Northing,
+    Encounter_UTMZone = "19",
+    Encounter_Disposition = "Live",
+    
+    Release_Status = "Yes",
+    Release_Timezone = "Eastern",
+    Release_Timestamp = Date,
+    Release_Location = Site,
+    Release_Easting = Easting,
+    Release_Northing = Northing,
+    
+    Observed_Acoustic_ID = NA,
+    Observed_PIT_ID = PIT.CODE,
+    Observed_Radio_ID = NA,
+    Observed_External_TagID = NA,
+    
+    TagType = tagtype,
+    TagManufacturer = NA,
+    TagModel = NA,
+    TagSerialNumber = NA,
+    EstTagLife = NA,
+  
+    Acoustic_ID = NA,
+    Acoustic_Sensor_type = NA,
+    `Acoustic_ Sensor_idcode` = NA,
+    Acoustic_Sensor_value = NA,
+    
+    PIT_ID = PIT.CODE,
+    Radio_ID = NA,
+    Radio_Freq = NA,
+    External_TagID = NA,
+    
+    Clip1 = NA,
+    Clip2 = NA,
+    VIE = "None",
+    
+    `ForkLength (cm)` = FL,
+    `TotalLength (cm)` = TL,
+    `Mass (g)` = NA,
+    Sex = Sex,
+    
+    `STRG_Interorbital(mm)` = Interorbital,
+    `STRG_InsideMouth(mm)` = Inside.Mouth,
+    `STRG_OutsideMouth(mm)` = Outside.Mouth,
+    
+    Notes = Notes,
+    `Operator(s)` = "JZ,SE"
+  )
+
+tid25rcnt <- rbind(tid25rcntmult, tid25rcntpit)
 ```
 
 ## Save CSV
