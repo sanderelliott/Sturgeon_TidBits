@@ -17,9 +17,9 @@ library(ggspatial)
 # Load Data and Check Characteristics
 
 ```{r}
-enc_IC <- read.csv("2025/tagsheet_to_tidbits2025/output/UEF_IC_AST_SNS_SE_RAW.csv", 
+enc_IC <- read.csv("tagsheet_to_tidbits2025/output/UEF_IC_AST_SNS_SE_RAW.csv", 
                    na.strings = "")
-enc_RCNT <- read.csv("2025/tagsheet_to_tidbits2025/output/UEF_RCNT_AST_SNS_SE_RAW.csv", 
+enc_RCNT <- read.csv("tagsheet_to_tidbits2025/output/UEF_RCNT_AST_SNS_SE_RAW.csv", 
                      na.strings = "")
 glimpse(enc_IC)
 glimpse(enc_RCNT)
