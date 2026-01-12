@@ -116,11 +116,13 @@ sumszIC1 <- enc_IC1 %>%
             max_TL = max(TotalLength..cm.),
             range_TL = max(TotalLength..cm.) - min(TotalLength..cm.))
 sumszIC1
+
+
 ```
 
 ## Interobital to Mouth
 
-check ratios of IO to Mouth **AST < 0.55; SNS > 0.55**
+check ratios of IO to Mouth **AST \< 0.55; SNS \> 0.55**
 
 ```{r}
 
@@ -212,35 +214,9 @@ ggplot(data = RCNTloc_df) +
   theme_minimal()
 ```
 
-
-
 ## Output csv
 
 ```{r}
 write.csv(enc_IC1, "2025/output/UEF_IC_AST_SNS_SE.csv", na = "", row.names = FALSE)
 write.csv(enc_RCNT, "2025/output/UEF_RCNT_AST_SNS_SE.csv", na = "", row.names = FALSE)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
