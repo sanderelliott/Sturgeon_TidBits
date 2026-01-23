@@ -136,7 +136,7 @@ recaps <- alldaysr %>%
 recaps
 ```
 
-### Make Form Acoustic
+### Make Form Initial Capture
 
 ```{r}
 tidnames <- names(tidex)
