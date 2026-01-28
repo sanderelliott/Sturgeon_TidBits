@@ -1,3 +1,59 @@
+# Packages ----
+#install.packages("readr")
+#install.packages("readxl") 
+
+library(readr)
+library(readxl)
+
+# Load UMaine Data ----
+
+um2006 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 1,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2007 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 2,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2008 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 3,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2009 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 4,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2010 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 5,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2011 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 6,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2012 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 7,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2013 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 8,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2014 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 9,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2015 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 10,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2016 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 11,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2017 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 12,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2018 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 13,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2019 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 14,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+um2020 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 15,
+                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
+
+## Read in example encounter forms
+
+encexic <- read.csv("QAQC/IntoTidBits/Encounter Forms/2025/output/UEF_IC_AST_SNS_SE.csv")
+encexrcnt <- read.csv("QAQC/IntoTidBits/Encounter Forms/2025/output/UEF_RCNT_AST_SNS_SE.csv")
+
+
+## Read in example history
+
+tidSNShst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_SNShist_allyrs.csv")
+tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_allyrs.csv")
+
+
+
+
+# FUNCTIONS ----
+
 tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
                          tagtype, tagman, tagmod, Serial_N, taglif, acid, exid, pitid,
                          FL, TL, Mass, Sex, Interorbital, Inside.Mouth, Outside.Mouth, Notes) {
