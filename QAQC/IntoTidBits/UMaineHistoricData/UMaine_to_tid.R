@@ -1,53 +1,16 @@
 getwd()
 
-## Load Packages ----
+# Load Packages ----
 
-#install.packages("readr")
-#install.packages("readxl") 
 #install.packages("dplyr")
 #install.packages("stringr")
 #install.packages("tidyr")
+#install.packages("lubridate")
 
-library(readr)
-library(readxl)
 library(dplyr)
 library(stringr)
 library(tidyr)
-
-# Load UMaine Data
-
-um2006 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 1,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2007 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 2,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2008 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 3,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2009 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 4,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2010 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 5,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2011 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 6,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2012 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 7,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2013 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 8,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2014 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 9,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2015 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 10,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2016 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 11,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2017 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 12,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2018 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 13,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2019 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 14,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-um2020 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 15,
-                     na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
-
-names(um2006)
+library(lubridate)
 
 # Bin similar sets ----
 
@@ -84,13 +47,8 @@ bin0610 <- rbind(um2006, um2007, um2008, um2010)
 
 #bin1213 <- rbind(um2012, um2013) ###didnt work
 
-# transfer sheets to encounter form ----
+# transfer sheets to encounter form by year ----
 
-## Read in example encounter forms
-
-encexic <- read.csv("QAQC/IntoTidBits/Encounter Forms/2025/output/UEF_IC_AST_SNS_SE.csv")
-encecrcnt <- read.csv("QAQC/IntoTidBits/Encounter Forms/2025/output/UEF_RCNT_AST_SNS_SE.csv")
-  
 ## 2006 -2010 ----
 tagid_cols0610 <- c("PIT ID", "Carlin ID", "Coded Type", "Cont. Type")
 
@@ -119,12 +77,14 @@ bin0610cln <- bin0610 %>%
   select(-n_ids) %>%
   mutate(
     Comments = replace_na(Comments, ""),
-    Name     = replace_na(Name, ""),
-    Comments = str_c(Comments, Name, sep = " "),
+    Name = replace_na(Name, ""),
+    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    Comments = str_c(Comments, Name, `gen. ID`, sep = " "),
     Comments = str_squish(Comments),
     Comments = na_if(Comments, ""),
     `Mass (kg)` = as.numeric(`Mass (kg)`)
   )
+
 
 bin0610ic <- bin0610cln %>% 
   filter(`Recap (y/n)` == "N")
@@ -132,14 +92,14 @@ bin0610ic <- bin0610cln %>%
 tfn
 names(bin0610ic)
 
-tid0610ic <- tidsheet_inc(bin0610ic, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location, 
+um_enc0610ic <- tidsheet_inc(bin0610ic, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location, 
                           Easting = `US Easting`, Northing = `US Northing`, tagtype = tagtype, tagman = NA_character_,
-                          tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = NA_character_,
+                          tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                           exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                           Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
                           Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
 
-tid0610ic <- tid0610ic %>% 
+um_enc0610ic <- um_enc0610ic %>% 
   mutate(Encounter_Disposition = case_when(str_detect(str_to_lower(Notes), "necropsy") ~ "Dead",
       TRUE ~ Encounter_Disposition),
       Release_Status = case_when(str_detect(str_to_lower(Notes), "necropsy") ~ "No",
@@ -154,9 +114,9 @@ bin0610rc <- bin0610cln %>%
 tfn
 names(bin0610rc)
 
-tid0610rc <- tidsheet_rc(bin0610rc, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location, 
+um_enc0610rc <- tidsheet_rc(bin0610rc, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location, 
                          Easting = `US Easting`, Northing = `US Northing`, tagtype = tagtype, tagman = NA_character_,
-                         tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = NA_character_,
+                         tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                          exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000), 
                          Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
                          Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
@@ -182,7 +142,13 @@ um2011cln <- um2011 %>%
       TRUE ~ "None")) %>%
   select(-n_ids) %>%
   mutate(
-    Notes = str_c("Genetic ID", `gen. ID`, sep = " "))
+    Comments = replace_na(Comments, ""),
+    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    Comments = str_c(Comments, `gen. ID`, sep = " "),
+    Comments = str_squish(Comments),
+    Comments = na_if(Comments, ""),
+    `Mass (kg)` = as.numeric(`Mass (kg)`)
+  )
 
 ## Initial Captures
 
@@ -192,12 +158,12 @@ um2011ic <- um2011cln %>%
 tfn
 names(um2011ic)
 
-tid2011ic <- tidsheet_inc(um2011ic, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location,
+um_enc2011ic <- tidsheet_inc(um2011ic, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location,
                           Easting = `US Easting`, Northing = `US Northing`, tagman = NA_character_, tagtype = tagtype, 
-                          tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = NA_character_,
+                          tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                           exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                           Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                          Outside.Mouth = `Outside Mouth (mm)`, Notes = Notes)
+                          Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
 
 
 ## Recaptures
@@ -208,12 +174,74 @@ um2011rc <- um2011cln %>%
 tfn
 names(um2011rc)
 
-tid2011rc <- tidsheet_rc(um2011rc, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location,
+um_enc2011rc <- tidsheet_rc(um2011rc, Species = Species, River = NA_character_, Date = `Pull Date & Time`, Site = Location,
                          Easting = `US Easting`, Northing = `US Northing`, tagman = NA_character_, tagtype = tagtype, 
-                         tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = NA_character_,
+                         tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                          exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                          Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                         Outside.Mouth = `Outside Mouth (mm)`, Notes = Notes)
+                         Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+
+
+
+## 2012 ----
+
+tagid_cols2012 <- c("PIT ID", "Carlin ID", "Coded Type")
+
+um2012cln <- um2012 %>%
+  filter(Species == "Atlantic Sturgeon" | Species == "Shortnose Sturgeon") %>% 
+  mutate(
+    n_ids = rowSums(!is.na(across(all_of(tagid_cols2011)))),
+    tagtype = case_when(
+      n_ids > 1 ~ "Multiple",
+      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(`Carlin ID`) ~ "Carlin",
+      !is.na(`PIT ID`) ~ "PIT",
+      TRUE ~ "None")) %>%
+  select(-n_ids) %>%
+  mutate(
+    Comments = replace_na(Comments, ""),
+    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    Comments = str_c(Comments, `gen. ID`, sep = " "),
+    Comments = str_squish(Comments),
+    Comments = na_if(Comments, ""),
+    `Mass (kg)` = as.numeric(`Mass (kg)`))
+
+
+## Initial Captures 
+
+um2012ic <- um2012cln %>% 
+  filter(`Recap (y/n)` == "N") 
+
+tfn
+names(um2012ic)
+
+um_enc2012ic <- tidsheet_inc(um2012ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                             Easting = `US Easting`, Northing = `US Northing`, tagman = NA_character_, tagtype = tagtype, 
+                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                             exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+
+
+
+
+## Recaptures 
+
+um2012rc <- um2012cln %>% 
+  filter(`Recap (y/n)` == "Y")
+
+tfn
+names(um2012rc)
+
+um_enc2012rc <- tidsheet_rc(um2012rc, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                            Easting = `US Easting`, Northing = `US Northing`, tagman = NA_character_, tagtype = tagtype, 
+                            tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                            exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                            Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+
+
+## 2013 ----
 
 
 
@@ -226,6 +254,29 @@ tid2011rc <- tidsheet_rc(um2011rc, Species = Species, River = NA_character_, Dat
 
 
 
+
+
+
+# Bind Sheets Together ----
+
+um_enc_combinedic <- rbind(um_enc0610ic, um_enc2011ic, um_enc2012ic)
+
+
+# Compare to Tidbits ----
+
+tidhst <- rbind(tidASThst, tidSNShst)
+
+tid0612 <- tidhst %>% 
+  filter(Event == "Initial Capture/Release (PIT tag)" | 
+           Event == "Initial Capture/Release (PIT tag)" | 
+           Event == "Recapture (PIT tag)" | 
+           Event == "Recapture (Acoustic tag)" | 
+           Event == "Initial Capture/Release (Visual tag)" | 
+           Event == "Recapture (Visual tag)") %>% 
+  mutate(Period = as.Date(Period), 
+         Year = year(Period)) %>% 
+  filter(Year < 2013) %>% 
+  select(-Year)
 
 
 
