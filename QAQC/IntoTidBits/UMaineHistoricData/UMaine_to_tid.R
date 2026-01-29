@@ -243,6 +243,8 @@ um_enc2012rc <- tidsheet_rc(um2012rc, Species = Species, River = NA_character_, 
 
 ## 2013 ----
 
+um2013cln <- um2013 %>% 
+  mutate() #### need to convert lat long to easting northing
 
 
 
