@@ -5,7 +5,9 @@
 library(readr)
 library(readxl)
 
-# Load UMaine Data ----
+# Load Data ----
+
+## UMaine data
 
 um2006 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 1,
                      na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
