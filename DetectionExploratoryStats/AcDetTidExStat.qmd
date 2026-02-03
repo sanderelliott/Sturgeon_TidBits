@@ -34,22 +34,85 @@ Species: AST By Detection Dates Begin Date: 01/01/2016 End Date: 12/31/2018 Tag 
 
 Exporting raw detections will take some time. It pulls the full fish history for every fish detected so you may get detections outside of your time frame. If Tidbits won't export try a shorter time frame and combine them later.
 
+
+## Load Raw Detections
+
+Raw detections mess up github something fierce, so I will pull directly from my computer
+
 ```{r}
-rawtidcsv <- read.csv("data/AST_achist2016_2018.csv") ##This may also take a while
+df <- read_csv( 
+  "C:/Users/sander.elliott/Downloads/tidbits-export-1770136798454.csv", 
+  show_col_types = FALSE)
 
 
+bad <- problems(df)
+bad
+bad_rows <- df[bad$row, ]
+unique(bad$col)
+unique(bad$actual)
+unique(bad_rows[,18])
+
+rm(df); gc()
+
+```
+
+## Re-try df with rxid as character
+
+```{r}
+df2 <- read_csv(
+  "C:/Users/sander.elliott/Downloads/tidbits-export-1770136798454.csv",
+  col_types = cols(
+    RxID = col_character()
+  )
+)
 
 
+bad2 <- problems(df2)
+bad2
+
+unique(df2[,18])
+glimpse(df2)
+```
 
 
+## Write FST to save space and remove huge df
 
+```{r}
+dim(df2)
+names(df2)
+names(df2)[1:10]
+str(df2$Period)   # or whatever your time column is
 
+str(df2$Period)
+head(df2$Period, 10)
 
+# optional drop
+df2 <- df2 %>% select(-any_of(c("SensorType","avgSensorValue", "avgCompute", 
+                              "Codespace", "AltFishID", "avgComputedValue", 
+                              "Frequency", "avgPower", "AntennaID")))
 
+write_fst(df2, "data/ASTdet16to18.fst")
 
+rm(df2); gc()
 
+rm(list = ls())
+rm(list = ls(all.names = TRUE))
 
-## commit help
+```
+
+## Load FST
+
+```{r}
+det <- read.fst("data/ASTdet16to18.fst")
+glimpse(det)
+```
+
+## Get to Work Fixing up Data
+
+```{r}
+
+```
+
 
 
 
