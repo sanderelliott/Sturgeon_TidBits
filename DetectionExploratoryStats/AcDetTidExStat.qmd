@@ -109,6 +109,75 @@ glimpse(det)
 
 ## Get to Work Fixing up Data
 
+
 ```{r}
+detglat <- det %>% 
+  mutate(YR = year(Period)) %>% 
+  filter(Event == "Detection",
+         YR == "2016" |
+         YR == "2017" | 
+           YR == "2018") %>% ### the years I want to look at RN
+  mutate(detection_timestamp_utc = as.POSIXct(Period),
+         transmitter_id = as.character(IDCode),
+         transmitter_codespace = as.character(TagId),
+         receiver_sn = RxID) %>% 
+  false_detections(tf=3600)  %>% ## Remove false detentions based on 1 hr
+  filter(., passed_filter == 1) %>% 
+  st_as_sf(coords = c("Easting", "Northing"), crs = 26919) %>%   # NAD83 / UTM zone 19N
+  st_transform(4269) %>%
+  mutate(
+    deploy_long = st_coordinates(.)[, 1],
+    deploy_lat = st_coordinates(.)[, 2],
+    animal_id = FishID) %>%
+  st_drop_geometry()
+
+
+
+glimpse(detglat)
 
 ```
+
+### get detection events & summarize
+
+```{r}
+detev <- detection_events(detglat, location_col = "SiteCode")
+glimpse(detev)
+
+detsum <- summarize_detections(detglat, location_col = "SiteCode")
+detsum
+```
+
+
+### GLATOS Plots
+
+```{r}
+abacus_plot(detglat, location_col = "SiteCode")
+```
+
+
+```{r}
+# Get land polygons
+coast <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Transform to EPSG:4326 (lat/long)
+coast <- st_transform(coast, 4326)
+
+
+
+detection_bubble_plot(detglat, location_col = "SiteCode", 
+                      background_ylim = c(min(detglat$deploy_lat) - 0.1,
+                                          max(detglat$deploy_lat + 0.1)),
+                      background_xlim = c(min(detglat$deploy_long) - 0.1,
+                                          max(detglat$deploy_long) + 0.1),
+                      map = tiles
+                      )
+```
+
+
+
+
+
+
+
+
+ 
