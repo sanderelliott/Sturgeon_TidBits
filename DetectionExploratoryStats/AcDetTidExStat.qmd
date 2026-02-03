@@ -5,23 +5,61 @@ format: pdf
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+knitr::opts_chunk$set(warning = T, error = T, message = F, tidy = T)
+options(tibble.width = Inf, tibble.print_max = Inf, tibble.print_min = Inf)
 ```
 
-You can add options to executable code like this
+# Load Packages
+
+GLATOS is a great package for acoustic telemetry work. It has to be installed via github. The code for that is commented out. I encourage looking through the glatos package in the help window.
 
 ```{r}
-#| echo: false
-2 * 2
+#install.packages("remotes")
+#remotes::install_github("ocean-tracking-network/glatos")
+library(glatos)
+?glatos
+library(tidyverse)
+library(sf)
+library(ggspatial)
+library(ggmap)
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+# Load Data
+
+I will load Atlantic sturgeon detections from 2016-2018 as an example. Export criteria are as follows:
+
+Species: AST By Detection Dates Begin Date: 01/01/2016 End Date: 12/31/2018 Tag Type: Acoustic Export: Export Fish Histories Interval: 1 (Raw detections)
+
+Exporting raw detections will take some time. It pulls the full fish history for every fish detected so you may get detections outside of your time frame. If Tidbits won't export try a shorter time frame and combine them later.
+
+```{r}
+rawtidcsv <- read.csv("data/AST_achist2016_2018.csv") ##This may also take a while
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
