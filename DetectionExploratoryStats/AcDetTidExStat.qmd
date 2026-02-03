@@ -5,6 +5,7 @@ format: pdf
 editor: visual
 ---
 
+
 ```{r}
 knitr::opts_chunk$set(warning = T, error = T, message = F, tidy = T)
 options(tibble.width = Inf, tibble.print_max = Inf, tibble.print_min = Inf)
@@ -36,7 +37,6 @@ Exporting raw detections will take some time. It pulls the full fish history for
 ```{r}
 rawtidcsv <- read.csv("data/AST_achist2016_2018.csv") ##This may also take a while
 
-```
 
 
 
@@ -49,8 +49,7 @@ rawtidcsv <- read.csv("data/AST_achist2016_2018.csv") ##This may also take a whi
 
 
 
-
-
+## commit help
 
 
 
