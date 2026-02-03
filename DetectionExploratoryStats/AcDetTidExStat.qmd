@@ -5,7 +5,6 @@ format: pdf
 editor: visual
 ---
 
-
 ```{r}
 knitr::opts_chunk$set(warning = T, error = T, message = F, tidy = T)
 options(tibble.width = Inf, tibble.print_max = Inf, tibble.print_min = Inf)
@@ -24,6 +23,7 @@ library(tidyverse)
 library(sf)
 library(ggspatial)
 library(ggmap)
+library(fst)
 ```
 
 # Load Data
@@ -34,8 +34,7 @@ Species: AST By Detection Dates Begin Date: 01/01/2016 End Date: 12/31/2018 Tag 
 
 Exporting raw detections will take some time. It pulls the full fish history for every fish detected so you may get detections outside of your time frame. If Tidbits won't export try a shorter time frame and combine them later.
 
-
-## Load Raw Detections adn write FST
+## Load Raw Detections and write FST (SKIP TO "Load FST")
 
 ### Load Tidbits download
 
@@ -76,7 +75,6 @@ unique(df2[,18])
 glimpse(df2)
 ```
 
-
 ### Write FST to save space and remove huge df
 
 ```{r}
@@ -114,16 +112,3 @@ glimpse(det)
 ```{r}
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
