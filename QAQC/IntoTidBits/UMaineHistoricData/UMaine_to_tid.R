@@ -79,8 +79,8 @@ bin0610cln <- bin0610 %>%
   mutate(
     Comments = replace_na(Comments, ""),
     Name = replace_na(Name, ""),
-    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
-    Comments = str_c(Comments, Name, `gen. ID`, sep = " "),
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    Comments = str_c(Comments, Name, sep = " "),
     Comments = str_squish(Comments),
     Comments = na_if(Comments, ""),
     `Mass (kg)` = as.numeric(`Mass (kg)`)
@@ -98,7 +98,7 @@ um_enc0610ic <- tidsheet_inc(bin0610ic, Species = Species, River = NA_character_
                           tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                           exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                           Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                          Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                          Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 um_enc0610ic <- um_enc0610ic %>% 
   mutate(Encounter_Disposition = case_when(str_detect(str_to_lower(Notes), "necropsy") ~ "Dead",
@@ -120,7 +120,7 @@ um_enc0610rc <- tidsheet_rc(bin0610rc, Species = Species, River = NA_character_,
                          tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                          exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000), 
                          Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                         Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                         Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 
 
@@ -143,11 +143,7 @@ um2011cln <- um2011 %>%
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
   mutate(
-    Comments = replace_na(Comments, ""),
-    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
-    Comments = str_c(Comments, `gen. ID`, sep = " "),
-    Comments = str_squish(Comments),
-    Comments = na_if(Comments, ""),
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
     `Mass (kg)` = as.numeric(`Mass (kg)`)
   )
 
@@ -164,7 +160,7 @@ um_enc2011ic <- tidsheet_inc(um2011ic, Species = Species, River = NA_character_,
                           tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                           exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                           Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                          Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                          Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 
 ## Recaptures
@@ -180,11 +176,11 @@ um_enc2011rc <- tidsheet_rc(um2011rc, Species = Species, River = NA_character_, 
                          tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                          exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                          Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                         Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                         Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 
 
-## 2012 ----
+## 2012 ---- 
 
 tagid_cols2012 <- c("PIT ID", "Carlin ID", "Coded Type")
 
@@ -200,11 +196,7 @@ um2012cln <- um2012 %>%
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
   mutate(
-    Comments = replace_na(Comments, ""),
-    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
-    Comments = str_c(Comments, `gen. ID`, sep = " "),
-    Comments = str_squish(Comments),
-    Comments = na_if(Comments, ""),
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
     `Mass (kg)` = as.numeric(`Mass (kg)`))
 
 
@@ -221,7 +213,7 @@ um_enc2012ic <- tidsheet_inc(um2012ic, Species = Species, River = NA_character_,
                              tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                              exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                              Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 
 
@@ -239,7 +231,7 @@ um_enc2012rc <- tidsheet_rc(um2012rc, Species = Species, River = NA_character_, 
                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                             exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 
 ## 2013 ----
@@ -275,10 +267,7 @@ um2013cln <- um2013 %>%
   dplyr::select(-n_ids) %>%
   mutate(
     Comments = replace_na(Comments, ""),
-    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
-    Comments = str_c(Comments, `gen. ID`, sep = " "),
-    Comments = str_squish(Comments),
-    Comments = na_if(Comments, ""),
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
     `Mass (kg)` = as.numeric(`Mass (kg)`))
 
 unique(um2013cln$US_Easting)
@@ -299,7 +288,7 @@ um_enc2013ic <- tidsheet_inc(um2013ic, Species = Species, River = NA_character_,
                              tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                              exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                              Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 
 ## Recaptures
@@ -312,7 +301,7 @@ um_enc2013rc <- tidsheet_rc(um2013ic, Species = Species, River = NA_character_, 
                              tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                              exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                              Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 ## 2014 ----
 
@@ -347,11 +336,7 @@ um2014cln <- um2014 %>%
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
   mutate(
-    Comments = replace_na(Comments, ""),
-    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
-    Comments = str_c(Comments, `gen. ID`, sep = " "),
-    Comments = str_squish(Comments),
-    Comments = na_if(Comments, ""),
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
     `Mass (kg)` = as.numeric(`Mass (kg)`))
 
 unique(um2014cln$US_Easting)
@@ -372,7 +357,7 @@ um_enc2014ic <- tidsheet_inc(um2014ic, Species = Species, River = NA_character_,
                              tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                              exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                              Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 
 ## Recaptures
@@ -385,20 +370,21 @@ um_enc2014rc <- tidsheet_rc(um2014ic, Species = Species, River = NA_character_, 
                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                             exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
-                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 ## 2015 ---- 
 
-tagid_cols2015 <- c("PIT ID", "Carlin ID", "Code") ## No tag type excep where it is omfg jpigaehoi'grsiOHGOHi;EHGOW
+tagid_cols2015 <- c("PIT ID", "External Tag", "Code") ## No tag type excep where it is omfg jpigaehoi'grsiOHGOHi;EHGOW
 
 glimpse(um2015)
 
+unique(um2015$`US LAT`)
+unique(um2015$`US LONG`) # cry a lot
+
 um2015cln <- um2015 %>%
   mutate(
-    US_lat_dd = case_when(grepl(" ", `US LAT`) ~ dms_to_ddsp(`US LAT`),
-                          .default = dms_to_dd(`US LAT`)),
-    US_lon_dd = case_when(grepl(" ", `US LONG`) ~ dms_to_ddsp(`US LONG`),
-                          .default = dms_to_dd(`US LONG`))    # negative for western hemisphere
+    US_lat_dd = dms_to_dd_any(`US LAT`),
+    US_lon_dd = -dms_to_dd_any(`US LONG`)
   ) %>%
   # convert to sf using lon, lat
   st_as_sf(coords = c("US_lon_dd", "US_lat_dd"), crs = 4326) %>%
@@ -411,26 +397,124 @@ um2015cln <- um2015 %>%
   ) %>%
   st_drop_geometry() %>% 
   mutate(
-    n_ids = rowSums(!is.na(across(all_of(tagid_cols2013)))),
+    n_ids = rowSums(!is.na(across(all_of(tagid_cols2015)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(`Coded Type`) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+      !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
   mutate(
-    Comments = replace_na(Comments, ""),
-    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
-    Comments = str_c(Comments, `gen. ID`, sep = " "),
-    Comments = str_squish(Comments),
-    Comments = na_if(Comments, ""),
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
     `Mass (kg)` = as.numeric(`Mass (kg)`))
 
-unique(um2014cln$US_Easting)
-unique(um2014cln$US_Northing)
+unique(um2015cln$US_Easting)
+unique(um2015cln$US_Northing)
 
-glimpse(um2014cln)
+glimpse(um2015cln)
+
+## Initial Captures
+
+um2015ic <- um2015cln %>% 
+  filter(`Recap (y/n)` == "N") 
+
+tfn
+names(um2015ic)
+
+um_enc2015ic <- tidsheet_inc(um2015ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                             Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                             exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
+
+
+## Recaptures
+
+um2015rc <- um2015cln %>% 
+  filter(`Recap (y/n)` == "Y")
+
+um_enc2015rc <- tidsheet_rc(um2015rc, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                            Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                            tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                            exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                            Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
+
+## 2016 ----
+
+## not looking at new tag for external tags 
+
+glimpse(um2016)
+
+tagid_cols2016 <- c("PIT ID", "External Tag", "Code") 
+
+unique(um2016$`US LAT`)
+unique(um2016$`US LONG`)  
+
+um2016cln <- um2016 %>%
+  mutate(
+    US_Lat = ifelse(is.na(`US LAT`), "44.56.515", `US LAT`),
+    US_Long = ifelse(is.na(`US LONG`), "68.38.678", `US LONG`),
+    US_lat_dd = dmm_to_dd(US_Lat),
+    US_lon_dd = -dmm_to_dd_(US_Long)
+  ) %>%
+  # convert to sf using lon, lat
+  st_as_sf(coords = c("US_lon_dd", "US_lat_dd"), crs = 4326) %>%
+  # transform to UTM zone 19N (NAD83)
+  st_transform(26919) %>%
+  # extract UTM coordinates into new columns
+  mutate(
+    US_Easting  = st_coordinates(.)[, 1],
+    US_Northing = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry() %>% 
+  mutate(
+    n_ids = rowSums(!is.na(across(all_of(tagid_cols2015)))),
+    tagtype = case_when(
+      n_ids > 1 ~ "Multiple",
+      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(`External Tag`) ~ "External",
+      !is.na(`PIT ID`) ~ "PIT",
+      TRUE ~ "None")) %>%
+  dplyr::select(-n_ids) %>%
+  mutate(
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    `Mass (kg)` = as.numeric(`Mass (kg)`))
+
+unique(um2016cln$US_Easting)
+unique(um2016cln$US_Northing)
+
+glimpse(um2016cln)
+
+## Initial Captures
+
+um2015ic <- um2015cln %>% 
+  filter(`Recap (y/n)` == "N") 
+
+tfn
+names(um2015ic)
+
+um_enc2015ic <- tidsheet_inc(um2015ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                             Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                             exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
+
+
+## Recaptures
+
+um2015rc <- um2015cln %>% 
+  filter(`Recap (y/n)` == "Y")
+
+um_enc2015rc <- tidsheet_rc(um2015rc, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                            Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                            tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                            exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                            Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
 
 # Bind Sheets Together ----
 
@@ -464,7 +548,14 @@ tid0612 <- tidhst %>%
 
 
 
-
+##### JUNK
+mutate(
+  Comments = replace_na(Comments, ""),
+  `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+  Comments = str_c(Comments, `gen. ID`, sep = " "),
+  Comments = str_squish(Comments),
+  Comments = na_if(Comments, ""),
+  `Mass (kg)` = as.numeric(`Mass (kg)`))
 
 
 

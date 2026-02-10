@@ -58,7 +58,7 @@ tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_ally
 
 tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
                          tagtype, tagman, tagmod, Serial_N, taglif, acid, exid, pitid,
-                         FL, TL, Mass, Sex, Interorbital, Inside.Mouth, Outside.Mouth, Notes) {
+                         FL, TL, Mass, Sex, Interorbital, Inside.Mouth, Outside.Mouth, Notes, dna) {
   desired_column_order <- c(
     "Event", "Species", "Rearing_Origin", "Stage", "System",
     "Encounter_Time_zone", "Encounter_Timestamp", "Encounter_Location",
@@ -72,7 +72,7 @@ tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
     "Mark.Observed", "Mark.Applied", "VIE", "ForkLength..cm.",
     "TotalLength..cm.", "Mass..g.", "Sex", "STRG_Interorbital.mm.",
     "STRG_InsideMouth.mm.", "STRG_OutsideMouth.mm.", "Notes",
-    "Operator.s."
+    "Operator.s.", "DNA"
   )
   
   x %>%
@@ -121,6 +121,7 @@ tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
       STRG_OutsideMouth.mm. = {{ Outside.Mouth }},
       Notes = {{ Notes }},
       Operator.s. = NA,
+      DNA = {{ dna }},
       .keep = "none"
     ) %>%
     dplyr::select(all_of(desired_column_order))
@@ -128,11 +129,12 @@ tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
 
 tfn <- c("Species", "River", "Date", "Site", "Easting", "Northing",
          "tagtype", "tagman", "tagmod", "Serial_N", "taglif", "acid", "exid", "pitid",
-         "FL", "TL", "Mass", "Sex", 'Interorbital', "Inside.Mouth", "Outside.Mouth", "Notes")
+         "FL", "TL", "Mass", "Sex", 'Interorbital', "Inside.Mouth", "Outside.Mouth", 
+         "Notes", "DNA")
 
 tidsheet_rc <- function(x, Species, River, Date, Site, Easting, Northing,
                         tagtype, tagman, tagmod, Serial_N, taglif, acid, exid, pitid,
-                        FL, TL, Mass, Sex, Interorbital, Inside.Mouth, Outside.Mouth, Notes) {
+                        FL, TL, Mass, Sex, Interorbital, Inside.Mouth, Outside.Mouth, Notes, dna) {
   
   desired_column_order <- c(
     "Event", "Species", "Rearing_Origin", "Stage", "System",
@@ -150,7 +152,7 @@ tidsheet_rc <- function(x, Species, River, Date, Site, Easting, Northing,
     "Clip1", "Clip2", "VIE",
     "ForkLength..cm.", "TotalLength..cm.", "Mass..g.", "Sex",
     "STRG_Interorbital.mm.", "STRG_InsideMouth.mm.",
-    "STRG_OutsideMouth.mm.", "Notes", "Operator.s."
+    "STRG_OutsideMouth.mm.", "Notes", "Operator.s.", "DNA"
   )
   
   x %>%
@@ -202,6 +204,7 @@ tidsheet_rc <- function(x, Species, River, Date, Site, Easting, Northing,
       STRG_OutsideMouth.mm. = {{ Outside.Mouth }},
       Notes = {{ Notes }},
       Operator.s. = NA,
+      DNA = {{ dna }},
       .keep = "none") %>%
     dplyr::select(all_of(desired_column_order))
 }
@@ -225,3 +228,44 @@ dms_to_ddsp <- function(x) {
     deg + min/60 + sec/3600
   })
 }
+
+dms_to_dd_any <- function(x) {
+  x <- trimws(x)
+  x <- gsub("\\s+", " ", x)      # collapse multiple spaces
+  x <- gsub(" ", ".", x)         # convert spaces to dots
+  
+  parts <- strsplit(x, "\\.")
+  
+  sapply(parts, function(p) {
+    if (length(p) != 3) return(NA_real_)  # malformed row
+    
+    nums <- suppressWarnings(as.numeric(p))
+    if (any(is.na(nums))) return(NA_real_)
+    
+    deg <- nums[1]
+    min <- nums[2]
+    sec <- nums[3]
+    
+    deg + min/60 + sec/3600
+  })
+}
+
+dmm_to_dd <- function(x) {
+  x <- trimws(x)
+  
+  sapply(x, function(val) {
+    if (is.na(val)) return(NA_real_)
+    
+    parts <- strsplit(val, "\\.")[[1]]
+    if (length(parts) != 3) return(NA_real_)
+    
+    deg <- suppressWarnings(as.numeric(parts[1]))
+    min <- suppressWarnings(as.numeric(parts[2]))
+    mmm <- suppressWarnings(as.numeric(parts[3]))
+    
+    if (any(is.na(c(deg, min, mmm)))) return(NA_real_)
+    
+    deg + (min + mmm/1000) / 60
+  })
+}
+
