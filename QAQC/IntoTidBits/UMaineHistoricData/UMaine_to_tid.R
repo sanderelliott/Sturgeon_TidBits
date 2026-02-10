@@ -11,6 +11,7 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 library(lubridate)
+library(sf)
 
 # Bin similar sets ----
 
@@ -74,7 +75,7 @@ bin0610cln <- bin0610 %>%
       TRUE ~ "None"
     )
   ) %>%
-  select(-n_ids) %>%
+  dplyr::select(-n_ids) %>%
   mutate(
     Comments = replace_na(Comments, ""),
     Name = replace_na(Name, ""),
@@ -140,7 +141,7 @@ um2011cln <- um2011 %>%
       !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
-  select(-n_ids) %>%
+  dplyr::select(-n_ids) %>%
   mutate(
     Comments = replace_na(Comments, ""),
     `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
@@ -197,7 +198,7 @@ um2012cln <- um2012 %>%
       !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
-  select(-n_ids) %>%
+  dplyr::select(-n_ids) %>%
   mutate(
     Comments = replace_na(Comments, ""),
     `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
@@ -243,21 +244,193 @@ um_enc2012rc <- tidsheet_rc(um2012rc, Species = Species, River = NA_character_, 
 
 ## 2013 ----
 
-um2013cln <- um2013 %>% 
-  mutate() #### need to convert lat long to easting northing
+
+tagid_cols2013 <- c("PIT ID", "Carlin ID", "Code") ## no tag type 
+
+um2013cln <- um2013 %>%
+  mutate(
+    US_LAT  = ifelse(nchar(`US LAT`)  > 8, substr(`US LAT`,  1, 8), `US LAT`),
+    US_LONG = ifelse(nchar(`US LONG`) > 8, substr(`US LONG`, 1, 8), `US LONG`),
+    US_lat_dd = dms_to_dd(US_LAT),
+    US_lon_dd = -dms_to_dd(US_LONG)   # negative for western hemisphere
+  ) %>%
+  # convert to sf using lon, lat
+  st_as_sf(coords = c("US_lon_dd", "US_lat_dd"), crs = 4326) %>%
+  # transform to UTM zone 19N (NAD83)
+  st_transform(26919) %>%
+  # extract UTM coordinates into new columns
+  mutate(
+    US_Easting  = st_coordinates(.)[, 1],
+    US_Northing = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry() %>% 
+  mutate(
+    n_ids = rowSums(!is.na(across(all_of(tagid_cols2013)))),
+    tagtype = case_when(
+      n_ids > 1 ~ "Multiple",
+      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(`Carlin ID`) ~ "Carlin",
+      !is.na(`PIT ID`) ~ "PIT",
+      TRUE ~ "None")) %>%
+  dplyr::select(-n_ids) %>%
+  mutate(
+    Comments = replace_na(Comments, ""),
+    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    Comments = str_c(Comments, `gen. ID`, sep = " "),
+    Comments = str_squish(Comments),
+    Comments = na_if(Comments, ""),
+    `Mass (kg)` = as.numeric(`Mass (kg)`))
+
+unique(um2013cln$US_Easting)
+unique(um2013cln$US_Northing)
+
+glimpse(um2013cln)
+
+## Initial Captures 
+
+um2013ic <- um2013cln %>% 
+  filter(`Recap (y/n)` == "N") 
+
+tfn
+names(um2013ic)
+
+um_enc2013ic <- tidsheet_inc(um2013ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                             Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                             exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
 
 
+## Recaptures
+
+um2013rc <- um2013cln %>% 
+  filter(`Recap (y/n)` == "Y")
+
+um_enc2013rc <- tidsheet_rc(um2013ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                             Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                             exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
+
+## 2014 ----
+
+tagid_cols2014 <- c("PIT ID", "Carlin ID", "Code") ## No tag type
+
+glimpse(um2014)
+
+um2014cln <- um2014 %>%
+  mutate(
+    US_LAT  = ifelse(is.na(`US LAT`), "44.40.32", `US LAT`), ## replacing NAs with nearby site. Best option i can think of
+    US_LONG = ifelse(is.na(`US LONG`), "68.48.42", `US LONG`),
+    US_lat_dd = dms_to_dd(US_LAT),
+    US_lon_dd = -dms_to_dd(US_LONG)   # negative for western hemisphere
+  ) %>%
+  # convert to sf using lon, lat
+  st_as_sf(coords = c("US_lon_dd", "US_lat_dd"), crs = 4326) %>%
+  # transform to UTM zone 19N (NAD83)
+  st_transform(26919) %>%
+  # extract UTM coordinates into new columns
+  mutate(
+    US_Easting  = st_coordinates(.)[, 1],
+    US_Northing = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry() %>% 
+  mutate(
+    n_ids = rowSums(!is.na(across(all_of(tagid_cols2013)))),
+    tagtype = case_when(
+      n_ids > 1 ~ "Multiple",
+      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(`Carlin ID`) ~ "Carlin",
+      !is.na(`PIT ID`) ~ "PIT",
+      TRUE ~ "None")) %>%
+  dplyr::select(-n_ids) %>%
+  mutate(
+    Comments = replace_na(Comments, ""),
+    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    Comments = str_c(Comments, `gen. ID`, sep = " "),
+    Comments = str_squish(Comments),
+    Comments = na_if(Comments, ""),
+    `Mass (kg)` = as.numeric(`Mass (kg)`))
+
+unique(um2014cln$US_Easting)
+unique(um2014cln$US_Northing)
+
+glimpse(um2014cln)
+
+## Initial Captures 
+
+um2014ic <- um2014cln %>% 
+  filter(`Recap (y/n)` == "N") 
+
+tfn
+names(um2014ic)
+
+um_enc2014ic <- tidsheet_inc(um2014ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                             Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                             exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
 
 
+## Recaptures
 
+um2014rc <- um2014cln %>% 
+  filter(`Recap (y/n)` == "Y")
 
+um_enc2014rc <- tidsheet_rc(um2014ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+                            Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
+                            tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                            exid = `Carlin ID`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                            Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments)
 
+## 2015 ---- 
 
+tagid_cols2015 <- c("PIT ID", "Carlin ID", "Code") ## No tag type excep where it is omfg jpigaehoi'grsiOHGOHi;EHGOW
 
+glimpse(um2015)
 
+um2015cln <- um2015 %>%
+  mutate(
+    US_lat_dd = case_when(grepl(" ", `US LAT`) ~ dms_to_ddsp(`US LAT`),
+                          .default = dms_to_dd(`US LAT`)),
+    US_lon_dd = case_when(grepl(" ", `US LONG`) ~ dms_to_ddsp(`US LONG`),
+                          .default = dms_to_dd(`US LONG`))    # negative for western hemisphere
+  ) %>%
+  # convert to sf using lon, lat
+  st_as_sf(coords = c("US_lon_dd", "US_lat_dd"), crs = 4326) %>%
+  # transform to UTM zone 19N (NAD83)
+  st_transform(26919) %>%
+  # extract UTM coordinates into new columns
+  mutate(
+    US_Easting  = st_coordinates(.)[, 1],
+    US_Northing = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry() %>% 
+  mutate(
+    n_ids = rowSums(!is.na(across(all_of(tagid_cols2013)))),
+    tagtype = case_when(
+      n_ids > 1 ~ "Multiple",
+      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(`Carlin ID`) ~ "Carlin",
+      !is.na(`PIT ID`) ~ "PIT",
+      TRUE ~ "None")) %>%
+  dplyr::select(-n_ids) %>%
+  mutate(
+    Comments = replace_na(Comments, ""),
+    `gen. ID` = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    Comments = str_c(Comments, `gen. ID`, sep = " "),
+    Comments = str_squish(Comments),
+    Comments = na_if(Comments, ""),
+    `Mass (kg)` = as.numeric(`Mass (kg)`))
 
+unique(um2014cln$US_Easting)
+unique(um2014cln$US_Northing)
 
-
+glimpse(um2014cln)
 
 # Bind Sheets Together ----
 
@@ -266,7 +439,13 @@ um_enc_combinedic <- rbind(um_enc0610ic, um_enc2011ic, um_enc2012ic)
 
 # Compare to Tidbits ----
 
-tidhst <- rbind(tidASThst, tidSNShst)
+tidhst <- rbind(tidASThst, tidSNShst) %>% 
+  filter(Event == "Initial Capture/Release (PIT tag)" | 
+           Event == "Initial Capture/Release (PIT tag)" | 
+           Event == "Recapture (PIT tag)" | 
+           Event == "Recapture (Acoustic tag)" | 
+           Event == "Initial Capture/Release (Visual tag)" | 
+           Event == "Recapture (Visual tag)")
 
 tid0612 <- tidhst %>% 
   filter(Event == "Initial Capture/Release (PIT tag)" | 
@@ -278,7 +457,7 @@ tid0612 <- tidhst %>%
   mutate(Period = as.Date(Period), 
          Year = year(Period)) %>% 
   filter(Year < 2013) %>% 
-  select(-Year)
+  dplyr::select(-Year)
 
 
 
