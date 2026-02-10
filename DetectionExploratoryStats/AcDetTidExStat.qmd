@@ -156,21 +156,10 @@ abacus_plot(detglat, location_col = "SiteCode")
 
 
 ```{r}
-# Get land polygons
-coast <- ne_countries(scale = "medium", returnclass = "sf")
-
-# Transform to EPSG:4326 (lat/long)
-coast <- st_transform(coast, 4326)
-
-
-
 detection_bubble_plot(detglat, location_col = "SiteCode", 
                       background_ylim = c(min(detglat$deploy_lat) - 0.1,
                                           max(detglat$deploy_lat + 0.1)),
-                      background_xlim = c(min(detglat$deploy_long) - 0.1,
-                                          max(detglat$deploy_long) + 0.1),
-                      map = tiles
-                      )
+                      background_xlim = c(min(detglat$deploy_long) - 0.1)
 ```
 
 
