@@ -123,7 +123,7 @@ tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
       Operator.s. = NA,
       .keep = "none"
     ) %>%
-    select(all_of(desired_column_order))
+    dplyr::select(all_of(desired_column_order))
 }
 
 tfn <- c("Species", "River", "Date", "Site", "Easting", "Northing",
@@ -203,5 +203,25 @@ tidsheet_rc <- function(x, Species, River, Date, Site, Easting, Northing,
       Notes = {{ Notes }},
       Operator.s. = NA,
       .keep = "none") %>%
-    select(all_of(desired_column_order))
+    dplyr::select(all_of(desired_column_order))
+}
+
+dms_to_dd <- function(x) {
+  parts <- strsplit(x, "\\.")
+  sapply(parts, function(p) {
+    deg <- as.numeric(p[1])
+    min <- as.numeric(p[2])
+    sec <- as.numeric(p[3])
+    deg + min/60 + sec/3600
+  })
+}
+
+dms_to_ddsp <- function(x) {
+  parts <- strsplit(x, "\\ ")
+  sapply(parts, function(p) {
+    deg <- as.numeric(p[1])
+    min <- as.numeric(p[2])
+    sec <- as.numeric(p[3])
+    deg + min/60 + sec/3600
+  })
 }
