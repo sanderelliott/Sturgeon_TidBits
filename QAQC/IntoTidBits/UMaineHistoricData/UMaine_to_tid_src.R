@@ -56,6 +56,8 @@ tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_ally
 
 # FUNCTIONS ----
 
+## Initial Capture ----
+
 tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
                          tagtype, tagman, tagmod, Serial_N, taglif, acid, exid, pitid,
                          FL, TL, Mass, Sex, Interorbital, Inside.Mouth, Outside.Mouth, Notes, dna) {
@@ -124,13 +126,47 @@ tidsheet_inc <- function(x, Species, River, Date, Site, Easting, Northing,
       DNA = {{ dna }},
       .keep = "none"
     ) %>%
-    dplyr::select(all_of(desired_column_order))
+    dplyr::select(all_of(desired_column_order)) %>%
+    mutate(
+      Stage                   = as.logical(Stage),
+      Encounter_Easting       = as.integer(Encounter_Easting),
+      Encounter_Northing      = as.integer(Encounter_Northing),
+      Encounter_UTMZone       = as.integer(Encounter_UTMZone),
+      Release_Easting         = as.integer(Release_Easting),
+      Release_Northing        = as.integer(Release_Northing),
+      TagSerialNumber         = as.integer(TagSerialNumber),
+      EstTagLife              = as.integer(EstTagLife),
+      Acoustic_ID             = as.character(Acoustic_ID),
+      Acoustic_Sensor_type    = as.logical(Acoustic_Sensor_type),
+      Acoustic_.Sensor_idcode = as.logical(Acoustic_.Sensor_idcode),
+      Acoustic_Sensor_value   = as.logical(Acoustic_Sensor_value),
+      PIT_ID                  = as.character(PIT_ID),
+      Radio_ID                = as.logical(Radio_ID),
+      Radio_Freq              = as.logical(Radio_Freq),
+      Radio_BurstRate         = as.logical(Radio_BurstRate),
+      External_TagID          = as.logical(External_TagID),
+      Mark.Observed           = as.character(Mark.Observed),
+      Mark.Applied            = as.character(Mark.Applied),
+      VIE                     = as.character(VIE),
+      ForkLength..cm.         = as.numeric(ForkLength..cm.),
+      TotalLength..cm.        = as.numeric(TotalLength..cm.),
+      Mass..g.                = as.numeric(Mass..g.),
+      Sex                     = as.character(Sex),
+      STRG_Interorbital.mm.   = as.numeric(STRG_Interorbital.mm.),
+      STRG_InsideMouth.mm.    = as.numeric(STRG_InsideMouth.mm.),
+      STRG_OutsideMouth.mm.   = as.numeric(STRG_OutsideMouth.mm.),
+      Notes                   = as.character(Notes),
+      Operator.s.             = as.character(Operator.s.),
+      DNA                     = as.character(DNA)
+    )
 }
 
 tfn <- c("Species", "River", "Date", "Site", "Easting", "Northing",
          "tagtype", "tagman", "tagmod", "Serial_N", "taglif", "acid", "exid", "pitid",
          "FL", "TL", "Mass", "Sex", 'Interorbital', "Inside.Mouth", "Outside.Mouth", 
          "Notes", "DNA")
+
+## Recaptures ----
 
 tidsheet_rc <- function(x, Species, River, Date, Site, Easting, Northing,
                         tagtype, tagman, tagmod, Serial_N, taglif, acid, exid, pitid,
@@ -206,8 +242,31 @@ tidsheet_rc <- function(x, Species, River, Date, Site, Easting, Northing,
       Operator.s. = NA,
       DNA = {{ dna }},
       .keep = "none") %>%
-    dplyr::select(all_of(desired_column_order))
+    dplyr::select(all_of(desired_column_order)) %>% 
+    mutate(
+      Stage                   = as.logical(Stage),
+      Encounter_Easting       = as.integer(Encounter_Easting),
+      Encounter_Northing      = as.integer(Encounter_Northing),
+      Encounter_UTMZone       = as.integer(Encounter_UTMZone),
+      Release_Easting         = as.integer(Release_Easting),
+      Release_Northing        = as.integer(Release_Northing),
+      TagSerialNumber         = as.integer(TagSerialNumber),
+      Acoustic_ID             = as.character(Acoustic_ID),
+      PIT_ID                  = as.character(PIT_ID),
+      External_TagID          = as.logical(External_TagID),
+      ForkLength..cm.         = as.numeric(ForkLength..cm.),
+      TotalLength..cm.        = as.numeric(TotalLength..cm.),
+      Mass..g.                = as.numeric(Mass..g.),
+      Sex                     = as.character(Sex),
+      STRG_Interorbital.mm.   = as.numeric(STRG_Interorbital.mm.),
+      STRG_InsideMouth.mm.    = as.numeric(STRG_InsideMouth.mm.),
+      STRG_OutsideMouth.mm.   = as.numeric(STRG_OutsideMouth.mm.),
+      Notes                   = as.character(Notes),
+      DNA                     = as.character(DNA)
+    )
 }
+
+## dms stuff ----
 
 dms_to_dd <- function(x) {
   parts <- strsplit(x, "\\.")
