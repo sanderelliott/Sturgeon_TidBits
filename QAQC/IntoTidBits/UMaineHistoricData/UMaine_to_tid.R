@@ -69,7 +69,7 @@ bin0610cln <- bin0610 %>%
     n_ids = rowSums(!is.na(across(all_of(tagid_cols0610)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
-      !is.na(`Coded Type`) | !is.na(`Cont. Type`) ~ "Acoustic",
+      !is.na(Code) | !is.na(`Cont. Type`) ~ "Acoustic",
       !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None"
@@ -137,7 +137,7 @@ um2011cln <- um2011 %>%
     n_ids = rowSums(!is.na(across(all_of(tagid_cols2011)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
-      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(Code) ~ "Acoustic",
       !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
@@ -190,7 +190,7 @@ um2012cln <- um2012 %>%
     n_ids = rowSums(!is.na(across(all_of(tagid_cols2011)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
-      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(Code) ~ "Acoustic",
       !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
@@ -260,7 +260,7 @@ um2013cln <- um2013 %>%
     n_ids = rowSums(!is.na(across(all_of(tagid_cols2013)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
-      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(Code) ~ "Acoustic",
       !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
@@ -330,7 +330,7 @@ um2014cln <- um2014 %>%
     n_ids = rowSums(!is.na(across(all_of(tagid_cols2013)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
-      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(Code) ~ "Acoustic",
       !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
@@ -400,7 +400,7 @@ um2015cln <- um2015 %>%
     n_ids = rowSums(!is.na(across(all_of(tagid_cols2015)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
-      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(Code) ~ "Acoustic",
       !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
@@ -455,16 +455,13 @@ unique(um2016$`US LONG`)
 
 um2016cln <- um2016 %>%
   mutate(
-    US_Lat = ifelse(is.na(`US LAT`), "44.56.515", `US LAT`),
+    US_Lat = ifelse(is.na(`US LAT`), "44.56.515", `US LAT`), ## missing value from milford
     US_Long = ifelse(is.na(`US LONG`), "68.38.678", `US LONG`),
     US_lat_dd = dmm_to_dd(US_Lat),
-    US_lon_dd = -dmm_to_dd_(US_Long)
+    US_lon_dd = -dmm_to_dd(US_Long)
   ) %>%
-  # convert to sf using lon, lat
   st_as_sf(coords = c("US_lon_dd", "US_lat_dd"), crs = 4326) %>%
-  # transform to UTM zone 19N (NAD83)
   st_transform(26919) %>%
-  # extract UTM coordinates into new columns
   mutate(
     US_Easting  = st_coordinates(.)[, 1],
     US_Northing = st_coordinates(.)[, 2]
@@ -474,12 +471,23 @@ um2016cln <- um2016 %>%
     n_ids = rowSums(!is.na(across(all_of(tagid_cols2015)))),
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
-      !is.na(`Coded Type`) ~ "Acoustic",
+      !is.na(Code) ~ "Acoustic",
       !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
   mutate(
+    Comments = replace_na(Comments, ""),
+    `Right Ventral scute count` = if_else(is.na(`Right Ventral scute count`),
+                                          "", str_c("Right Ventral scute count: ", 
+                                                    `Right Ventral scute count`)),
+    `Left Ventral scute count` = if_else(is.na(`Left Ventral scute count`),
+                                          "", str_c("Left Ventral scute count: ", 
+                                                    `Left Ventral scute count`)),
+    Comments = str_c(Comments, `Right Ventral scute count`,
+                     `Left Ventral scute count`, sep = " "),
+    Comments = str_squish(Comments),
+    Comments = na_if(Comments, ""),
     dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
     `Mass (kg)` = as.numeric(`Mass (kg)`))
 
@@ -490,13 +498,13 @@ glimpse(um2016cln)
 
 ## Initial Captures
 
-um2015ic <- um2015cln %>% 
+um2016ic <- um2016cln %>% 
   filter(`Recap (y/n)` == "N") 
 
 tfn
-names(um2015ic)
+names(um2016ic)
 
-um_enc2015ic <- tidsheet_inc(um2015ic, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+um_enc2016ic <- tidsheet_inc(um2016ic, Species = Species, River = NA_character_, Date = `Set Date`, Site = Location,
                              Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
                              tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                              exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
@@ -506,15 +514,107 @@ um_enc2015ic <- tidsheet_inc(um2015ic, Species = Species, River = NA_character_,
 
 ## Recaptures
 
-um2015rc <- um2015cln %>% 
+um2016rc <- um2016cln %>% 
   filter(`Recap (y/n)` == "Y")
 
-um_enc2015rc <- tidsheet_rc(um2015rc, Species = Species, River = NA_character_, Date = `Pull Date`, Site = Location,
+um_enc2016rc <- tidsheet_rc(um2016rc, Species = Species, River = NA_character_, Date = `Set Date`, Site = Location,
                             Easting = US_Easting, Northing = US_Northing, tagman = NA_character_, tagtype = tagtype, 
                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
                             exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
                             Sex = `Sex (M/F)`, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
+
+## 2017 ----
+
+
+glimpse(um2017) # some dmm some easting northing
+
+tagid_cols2017 <- c("PIT ID", "External Tag", "Code") 
+
+unique(um2017$`US LAT`)
+unique(um2017$`US LONG`)  
+
+um2017ll<- um2017 %>%
+  filter(is.na(`US Northing`) | Location == "Milford Fish Lift") %>% 
+  mutate(
+    US_Lat = ifelse(is.na(`US LAT`), "44.56.515", `US LAT`), ## missing value from milford
+    US_Long = ifelse(is.na(`US LONG`), "68.38.678", `US LONG`),
+    US_lat_dd = dmm_to_dd(US_Lat),
+    US_lon_dd = -dmm_to_dd(US_Long)
+  ) %>%
+  st_as_sf(coords = c("US_lon_dd", "US_lat_dd"), crs = 4326) %>%
+  st_transform(26919) %>%
+  mutate(
+    `US Easting`  = st_coordinates(.)[, 1],
+    `US Northing` = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry() %>% 
+  dplyr::select(-US_Lat, -US_Long)
+
+um2017en <- um2017 %>% 
+  filter(! is.na(`US Easting`))
+
+um2017cln <- rbind(um2017en, um2017ll) %>% 
+  mutate(
+    n_ids = rowSums(!is.na(across(all_of(tagid_cols2017)))),
+    tagtype = case_when(
+      n_ids > 1 ~ "Multiple",
+      !is.na(Code) ~ "Acoustic",
+      !is.na(`External Tag`) ~ "External",
+      !is.na(`PIT ID`) ~ "PIT",
+      TRUE ~ "None")) %>%
+  dplyr::select(-n_ids) %>%
+  mutate(
+    Comments = replace_na(Comments, ""),
+    `Right Side Scutes` = if_else(is.na(`Right Side Scutes`),
+                                          "", str_c("Right Side scute count: ", 
+                                                    `Right Side Scutes`)),
+    `Left Side Scutes` = if_else(is.na(`Left Side Scutes`),
+                                         "", str_c("Left Side scute count: ", 
+                                                   `Left Side Scutes`)),
+    `Belly Scutes` = if_else(is.na(`Belly Scutes`),
+                                 "", str_c("Belly Scutes: ", 
+                                           `Belly Scutes`)),
+    Comments = str_c(Comments, `Right Side Scutes`, `Left Side Scutes`,
+                     `Belly Scutes`, sep = " "),
+    Comments = str_squish(Comments),
+    Comments = na_if(Comments, ""),
+    dna = if_else(is.na(`gen. ID`), "", str_c("Genetic ID: ", `gen. ID`) ),
+    `Mass (kg)` = as.numeric(`Mass (kg)`))
+
+unique(um2017cln$`US Easting`)
+unique(um2017cln$`US Northing`)
+
+glimpse(um2017cln)
+
+## Initial Captures
+
+um2017ic <- um2017cln %>% 
+  filter(`Recap (y/n)` == "N") 
+
+tfn
+names(um2017ic)
+
+um_enc2017ic <- tidsheet_inc(um2017ic, Species = Species, River = NA_character_, Date = `Set Date`, Site = Location,
+                             Easting = `US Easting`, Northing = `US Northing`, tagman = NA_character_, tagtype = tagtype, 
+                             tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                             exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                             Sex = Sex, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                             Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
+
+
+## Recaptures
+
+um2017rc <- um2017cln %>% 
+  filter(`Recap (y/n)` == "Y")
+
+um_enc2017rc <- tidsheet_rc(um2017ic, Species = Species, River = NA_character_, Date = `Set Date`, Site = Location,
+                            Easting = `US Easting`, Northing = `US Northing`, tagman = NA_character_, tagtype = tagtype, 
+                            tagmod = `Coded Type`, Serial_N = `Coded Serial #`, taglif = NA_character_, acid = Code,
+                            exid = `External Tag`, pitid = `PIT ID`, FL = `FL (cm)`, TL = `TL (cm)`, Mass = (`Mass (kg)` *1000),
+                            Sex = Sex, Interorbital = `I-orb. (mm)`, Inside.Mouth = `Inside Mouth (mm)`, 
+                            Outside.Mouth = `Outside Mouth (mm)`, Notes = Comments, dna = dna)
+
 
 # Bind Sheets Together ----
 
