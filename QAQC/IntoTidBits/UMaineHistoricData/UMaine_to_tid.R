@@ -1158,6 +1158,14 @@ um_enc_combinedrc <- bind_rows(um_enc2006rc, um_enc2007rc, um_enc2008rc, um_enc2
 
 glimpse(um_enc_combinedrc)
 
+#write.csv(um_enc_combinedic,
+#          file.path(gdrive_path, "UEF_AST_SNS_UMaineHistoric_IC_Working.csv"),
+#          row.names = FALSE, na = "")
+
+#write.csv(um_enc_combinedrc,
+#          file.path(gdrive_path, "UEF_AST_SNS_UMaineHistoric_RCNT_Working.csv"),
+#          row.names = FALSE, na = "")
+
 # Compare to Tidbits ----
 
 tidhst <- rbind(tidASThst, tidSNShst) %>% 
