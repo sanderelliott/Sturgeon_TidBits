@@ -52,7 +52,7 @@ tidSNShst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_SNShist_ally
 tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_allyrs.csv")
 
 
-# PATHS
+# PATHS ----
 
 gdrive_base <- c("G:/My Drive", "H:/My Drive")
 gdrive_base <- gdrive_base[file.exists(gdrive_base)][1]

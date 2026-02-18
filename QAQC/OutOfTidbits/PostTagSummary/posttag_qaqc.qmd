@@ -1,0 +1,49 @@
+---
+title: "Sturgeon QAQC out of Tibits"
+author: "Sander Elliott"
+format: pdf
+editor: visual
+---
+
+# Load
+
+## Packages
+
+```{r warning = FALSE}
+library(tidyverse)
+library(glatos)
+
+```
+
+## Paths
+
+large files for detections that i store in google drive as they tend to break github
+
+```{r}
+
+gdrive_base <- c("G:/My Drive", "H:/My Drive")
+gdrive_base <- gdrive_base[file.exists(gdrive_base)][1]
+
+gdrive_path <- file.path(gdrive_base, "Code", "Sturgeon_TidBits", "QAQC", "OutOfTidbits", "PostTagSummary")
+```
+
+
+## Data
+
+```{r warning = FALSE}
+
+setwd(gdrive_path)
+
+## Files from Marc M.
+snsmarc <- read.csv("data/2025_SNS_captures_fish_histories_all_20260217.csv", 
+                    fileEncoding = "UTF-16LE") ## different file type 
+
+astmarc <- read.csv("data/2025_AST_captures_fish_histories_all_20260217.csv",
+                   fileEncoding = "UTF-16LE")
+## Files from Tidbits
+
+asttidhst <- read.csv("data/tidbits-export-1771426369587.csv")
+
+```
+
+

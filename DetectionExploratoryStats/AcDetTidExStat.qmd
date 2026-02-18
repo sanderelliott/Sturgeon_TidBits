@@ -109,7 +109,6 @@ glimpse(det)
 
 ## Get to Work Fixing up Data
 
-
 ```{r}
 detglat <- det %>% 
   mutate(YR = year(Period)) %>% 
@@ -147,13 +146,11 @@ detsum <- summarize_detections(detglat, location_col = "SiteCode")
 detsum
 ```
 
-
 ### GLATOS Plots
 
 ```{r}
 abacus_plot(detglat, location_col = "SiteCode")
 ```
-
 
 ```{r}
 detection_bubble_plot(detglat, location_col = "SiteCode", 
@@ -161,12 +158,3 @@ detection_bubble_plot(detglat, location_col = "SiteCode",
                                           max(detglat$deploy_lat + 0.1)),
                       background_xlim = c(min(detglat$deploy_long) - 0.1)
 ```
-
-
-
-
-
-
-
-
- 
