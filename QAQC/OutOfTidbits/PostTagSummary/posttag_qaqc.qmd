@@ -36,14 +36,109 @@ setwd(gdrive_path)
 
 ## Files from Marc M.
 snsmarc <- read.csv("data/2025_SNS_captures_fish_histories_all_20260217.csv", 
-                    fileEncoding = "UTF-16LE") ## different file type 
+                    fileEncoding = "UTF-16LE", na.strings = c("","   ")) ## different file type 
+snsmarc <- snsmarc[rowSums(is.na(snsmarc)) != ncol(snsmarc), ]
 
 astmarc <- read.csv("data/2025_AST_captures_fish_histories_all_20260217.csv",
-                   fileEncoding = "UTF-16LE")
+                   fileEncoding = "UTF-16LE", na.strings = c("","   "))
+astmarc <- astmarc[rowSums(is.na(astmarc)) != ncol(astmarc), ]
+
 ## Files from Tidbits
 
-asttidhst <- read.csv("data/tidbits-export-1771426369587.csv")
+tidasthst <- read.csv("data/tidbits-asthst25.csv", na.strings = c("","   "))
+tidasthst <- tidasthst[rowSums(is.na(tidasthst)) != ncol(tidasthst), ]
+
+tidastfsh <- read.csv("data/tidbits-astfsh25.csv", na.strings = c("","   "))
+tidastfsh <- tidastfsh[rowSums(is.na(tidastfsh)) != ncol(tidastfsh), ]
+
+tidsnshst <- read.csv("data/tidbits-snshst25.csv", na.strings = c("","   "))
+tidsnshst <- tidsnshst[rowSums(is.na(tidsnshst)) != ncol(tidsnshst), ]
+
+tidsnsfsh <- read.csv("data/tidbits-snsfsh25.csv", na.strings = c("","   "))
+tidsnsfsh <- tidsnsfsh[rowSums(is.na(tidsnsfsh)) != ncol(tidsnsfsh), ]
 
 ```
+
+
+
+# Fish
+
+```{r}
+glimpse(tidsnsfsh)
+glimpse(tidastfsh)
+```
+
+## Size
+
+```{r}
+## AST Size
+sumsz_ast <- tidastfsh %>%
+  group_by(System) %>%
+  summarise(n_captures = n(),
+            min_FL = min(ForkLength),
+            max_FL = max(ForkLength),
+            range_FL = max(ForkLength) - min(ForkLength),
+            min_TL = min(TotalLength),
+            max_TL = max(TotalLength),
+            range_TL = max(TotalLength) - min(TotalLength))
+sumsz_ast
+
+## SNS Size
+sumsz_sns <- tidsnsfsh %>%
+  group_by(System) %>%
+  summarise(n_captures = n(),
+            min_FL = min(ForkLength),
+            max_FL = max(ForkLength),
+            range_FL = max(ForkLength) - min(ForkLength),
+            min_TL = min(TotalLength),
+            max_TL = max(TotalLength),
+            range_TL = max(TotalLength) - min(TotalLength))
+sumsz_sns
+```
+
+## Interobital to Mouth
+
+check ratios of IO to Mouth **AST \< 0.55; SNS \> 0.55**
+
+```{r}
+
+tidastioRatio <- tidastfsh %>%
+  mutate(ratio = InsideMouth / Interorbital) %>%
+  filter(!is.na(ratio), is.finite(ratio)) %>% 
+  summarise(min = min(ratio),
+            max = max(ratio))
+
+tidastioRatio
+
+tidsnsioRatio <- tidsnsfsh %>%
+  mutate(ratio = InsideMouth / Interorbital) %>%
+  filter(!is.na(ratio), is.finite(ratio)) %>% 
+  summarise(min = min(ratio),
+            max = max(ratio))
+
+tidsnsioRatio
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
