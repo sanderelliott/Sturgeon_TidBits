@@ -1166,6 +1166,34 @@ glimpse(um_enc_combinedrc)
 #          file.path(gdrive_path, "UEF_AST_SNS_UMaineHistoric_RCNT_Working.csv"),
 #          row.names = FALSE, na = "")
 
+
+# Tag info ----
+
+## Get tag codes ----
+
+icIDs <- um_enc_combinedic %>% 
+  filter(! is.na(Acoustic_ID)) %>% 
+  mutate(y = year(Encounter_Timestamp)) %>% 
+  dplyr::select(Acoustic_ID, TagModel, TagSerialNumber, y)  
+head(icIDs)
+
+rcIDs <- um_enc_combinedrc %>% 
+  filter(! is.na(Acoustic_ID)) %>% 
+  mutate(y = year(Encounter_Timestamp)) %>% 
+  dplyr::select(Acoustic_ID, TagModel, TagSerialNumber, y) 
+  ungroup()
+head(rcIDs)
+
+IDs <- rbind(icIDs, rcIDs) %>% 
+  unique()
+
+
+write.csv(IDs,
+          file.path(gdrive_path, "output/tagIDs.csv"),
+          row.names = FALSE, na = "")
+
+f_id <- read.csv(file.path(gdrive_path, "data/full_id.csv"), na = "")
+
 # Compare to Tidbits ----
 
 tidhst <- rbind(tidASThst, tidSNShst) %>% 

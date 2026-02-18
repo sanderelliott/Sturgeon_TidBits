@@ -51,13 +51,15 @@ encexrcnt <- read.csv("QAQC/IntoTidBits/Encounter Forms/2025/output/UEF_RCNT_AST
 tidSNShst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_SNShist_allyrs.csv")
 tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_allyrs.csv")
 
+## Read in Acoustic IDs
+
 
 # PATHS ----
 
 gdrive_base <- c("G:/My Drive", "H:/My Drive")
 gdrive_base <- gdrive_base[file.exists(gdrive_base)][1]
 
-gdrive_path <- file.path(gdrive_base, "Code", "Sturgeon_TidBits", "Examples")
+gdrive_path <- file.path(gdrive_base, "Code", "Sturgeon_TidBits", "QAQC", "IntoTidBits", "UMaineHistoricData")
 
 # FUNCTIONS ----
 
