@@ -41,62 +41,62 @@ Exporting raw detections will take some time. It pulls the full fish history for
 Raw detections mess up github something fierce, so I will pull directly from my computer
 
 ```{r}
-df <- read_csv( 
-  "C:/Users/sander.elliott/Downloads/tidbits-export-1770136798454.csv", 
-  show_col_types = FALSE)
+#df <- read_csv( 
+#  "C:/Users/sander.elliott/Downloads/tidbits-export-1770136798454.csv", 
+#  show_col_types = FALSE)
 
 
-bad <- problems(df)
-bad
-bad_rows <- df[bad$row, ]
-unique(bad$col)
-unique(bad$actual)
-unique(bad_rows[,18])
+#bad <- problems(df)
+#bad
+#bad_rows <- df[bad$row, ]
+#unique(bad$col)
+#unique(bad$actual)
+#unique(bad_rows[,18])
 
-rm(df); gc()
+#rm(df); gc()
 
 ```
 
 ### Re-try df with rxid as character
 
 ```{r}
-df2 <- read_csv(
-  "C:/Users/sander.elliott/Downloads/tidbits-export-1770136798454.csv",
-  col_types = cols(
-    RxID = col_character()
-  )
-)
+#df2 <- read_csv(
+#  "C:/Users/sander.elliott/Downloads/tidbits-export-1770136798454.csv",
+#  col_types = cols(
+#    RxID = col_character()
+ # )
+#)
 
 
-bad2 <- problems(df2)
-bad2
+#bad2 <- problems(df2)
+#bad2
 
-unique(df2[,18])
-glimpse(df2)
+#unique(df2[,18])
+#glimpse(df2)
 ```
 
 ### Write FST to save space and remove huge df
 
 ```{r}
-dim(df2)
-names(df2)
-names(df2)[1:10]
-str(df2$Period)   # or whatever your time column is
+#dim(df2)
+#names(df2)
+#names(df2)[1:10]
+#str(df2$Period)   # or whatever your time column is
 
-str(df2$Period)
-head(df2$Period, 10)
+#str(df2$Period)
+#head(df2$Period, 10)
 
 # optional drop
-df2 <- df2 %>% select(-any_of(c("SensorType","avgSensorValue", "avgCompute", 
-                              "Codespace", "AltFishID", "avgComputedValue", 
-                              "Frequency", "avgPower", "AntennaID")))
+#df2 <- df2 %>% select(-any_of(c("SensorType","avgSensorValue", "avgCompute", 
+ #                             "Codespace", "AltFishID", "avgComputedValue", 
+#                              "Frequency", "avgPower", "AntennaID")))
 
-write_fst(df2, "data/ASTdet16to18.fst")
+#write_fst(df2, "data/ASTdet16to18.fst")
 
-rm(df2); gc()
+#rm(df2); gc()
 
-rm(list = ls())
-rm(list = ls(all.names = TRUE))
+#rm(list = ls())
+#rm(list = ls(all.names = TRUE))
 
 ```
 
@@ -153,8 +153,16 @@ abacus_plot(detglat, location_col = "SiteCode")
 ```
 
 ```{r}
+#library(rnaturalearth)
+#library(sf)
+
+
+maine <- st_as_sf(map("state", "maine", plot = FALSE, fill = TRUE)) %>% st_transform(4326)
+
+
+
 detection_bubble_plot(detglat, location_col = "SiteCode", 
-                      background_ylim = c(min(detglat$deploy_lat) - 0.1,
-                                          max(detglat$deploy_lat + 0.1)),
-                      background_xlim = c(min(detglat$deploy_long) - 0.1)
+                      map = maine,
+                      background_ylim = c(min(detglat$deploy_lat) - 0.1, max(detglat$deploy_lat + 0.1)),
+                      background_xlim = c(min(detglat$deploy_long) - 0.1, max(detglat$deploy_long +0.1)))
 ```
