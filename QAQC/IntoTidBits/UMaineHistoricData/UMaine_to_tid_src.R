@@ -56,8 +56,15 @@ tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_ally
 
 # PATHS ----
 
-gdrive_base <- c("G:/My Drive", "H:/My Drive")
-gdrive_base <- gdrive_base[file.exists(gdrive_base)][1]
+## Home
+gdrive_base <- "C:/Users/sande/My Drive (sander.elliott@maine.edu)"
+
+## Work
+#gdrive_base <- "G:/My Drive"
+
+
+#gdrive_base <- c("G:/My Drive", "H:/My Drive")
+#gdrive_base <- gdrive_base[file.exists(gdrive_base)][1]
 
 gdrive_path <- file.path(gdrive_base, "Code", "Sturgeon_TidBits", "QAQC", "IntoTidBits", "UMaineHistoricData")
 
