@@ -57,10 +57,12 @@ tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_ally
 # PATHS ----
 
 ## Home
-gdrive_base <- "C:/Users/sande/My Drive (sander.elliott@maine.edu)"
+
+#  gdrive_base <- "C:/Users/sande/My Drive (sander.elliott@maine.edu)"
 
 ## Work
-#gdrive_base <- "G:/My Drive"
+
+  gdrive_base <- "C:/Users/sander.elliott/My Drive (sander.elliott@maine.edu)"
 
 
 #gdrive_base <- c("G:/My Drive", "H:/My Drive")

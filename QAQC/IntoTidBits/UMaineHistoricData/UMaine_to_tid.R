@@ -1140,8 +1140,10 @@ um_enc2020rc <- tidsheet_rc(um2020rc, Species = Species, River = NA_character_, 
 um_enc_combinedic <- bind_rows(um_enc2006ic, um_enc2007ic, um_enc2008ic, um_enc2009ic,
                                um_enc2010ic, um_enc2011ic, um_enc2012ic, um_enc2013ic, 
                                um_enc2014ic, um_enc2015ic, um_enc2016ic, um_enc2017ic,
-                               um_enc2018ic, um_enc2019ic, um_enc2020ic)
+                               um_enc2018ic, um_enc2019ic, um_enc2020ic) 
 
+um_enc_combineddup <- um_enc_combinedic[c(107, 108),]
+glimpse(um_enc_combineddup)
 
 glimpse(um_enc_combinedic)
 
@@ -1153,18 +1155,18 @@ locations <- um_enc_combinedic %>%
 um_enc_combinedrc <- bind_rows(um_enc2006rc, um_enc2007rc, um_enc2008rc, um_enc2009rc,
                                um_enc2010rc, um_enc2011rc, um_enc2012rc, um_enc2013rc, 
                                um_enc2014rc, um_enc2015rc, um_enc2016rc, um_enc2017rc,
-                               um_enc2018rc, um_enc2019rc, um_enc2020rc)
+                               um_enc2018rc, um_enc2019rc, um_enc2020rc) 
 
 
 glimpse(um_enc_combinedrc)
 
-write.csv(um_enc_combinedic,
-          file.path(gdrive_path, "UEF_AST_SNS_UMaineHistoric_IC_Working.csv"),
-          row.names = FALSE, na = "")
+#write.csv(um_enc_combinedic,
+#          file.path(gdrive_path, "UEF_AST_SNS_UMaineHistoric_IC_Working.csv"),
+#          row.names = FALSE, na = "")
 
-write.csv(um_enc_combinedrc,
-          file.path(gdrive_path, "UEF_AST_SNS_UMaineHistoric_RCNT_Working.csv"),
-          row.names = FALSE, na = "")
+#write.csv(um_enc_combinedrc,
+#          file.path(gdrive_path, "UEF_AST_SNS_UMaineHistoric_RCNT_Working.csv"),
+#          row.names = FALSE, na = "")
 
 
 # Tag info ----
@@ -1187,18 +1189,97 @@ IDs <- rbind(icIDs, rcIDs) %>%
   unique()
 
 
-write.csv(IDs,
-         file.path(gdrive_path, "output/tagIDs.csv"),
-          row.names = FALSE, na = "")
+#write.csv(IDs,
+#         file.path(gdrive_path, "output/tagIDs.csv"),
+#          row.names = FALSE, na = "")
 
 
+
+
+
+## Add in fill ids ----
+
+
+## Initial Capture
+
+glimpse(um_enc_combinedic)
 
 f_id <- read.csv(file.path(gdrive_path, "data/full_id.csv"), na = "")
 
+ac_id_ic <- um_enc_combinedic %>% 
+  mutate(Acoustic_numeric = suppressWarnings(as.integer(Acoustic_ID))) %>% 
+  filter(
+    is.na(Acoustic_ID) | Acoustic_numeric %in% f_id$Partial_ID)%>% 
+  left_join(.,f_id, by = c("Acoustic_numeric" = "Partial_ID"), suffix = c("", "_f"),
+            relationship = "many-to-one") %>% 
+  mutate(
+         EstTagLife = EstTagLife_f,
+         Acoustic_ID = AcousticID,
+         Acoustic_Sensor_type = SensorType)
+ac_id_icf <- ac_id_ic[,1:45]
+  
+
+
+problem_ids_ic <- um_enc_combinedic %>% 
+  mutate(Acoustic_numeric = suppressWarnings(as.integer(Acoustic_ID))) %>% 
+  filter(!is.na(Acoustic_ID), !Acoustic_numeric %in% f_id$Partial_ID) %>% 
+  dplyr::select(- Acoustic_numeric)
+
+## Recapture
+
+ac_id_rc <- um_enc_combinedrc %>% 
+  mutate(Acoustic_numeric = suppressWarnings(as.integer(Acoustic_ID))) %>% 
+  filter(
+    is.na(Acoustic_ID) | Acoustic_numeric %in% f_id$Partial_ID) %>% 
+  left_join(f_id, by = c("Acoustic_numeric" = "Partial_ID"), suffix = c("", "_f"),
+            relationship = "many-to-one") %>% 
+  mutate(
+    EstTagLife = EstTagLife_f,
+    Acoustic_ID = AcousticID,
+    Acoustic_Sensor_type = SensorType)
+ac_id_rcf <- ac_id_rc[,1:48]
 
 
 
+problem_ids_rc <- um_enc_combinedrc %>% 
+  mutate(Acoustic_numeric = suppressWarnings(as.integer(Acoustic_ID))) %>% 
+  filter(!is.na(Acoustic_ID), !Acoustic_numeric %in% f_id$Partial_ID) %>% 
+  dplyr::select(- Acoustic_numeric)
 
+
+# QAQC ----
+
+## PIT ----
+
+bad_pitic <- ac_id_icf %>% filter(str_detect(PIT_ID, "\\*"))
+bad_pitrc <- ac_id_rcf %>% filter(str_detect(PIT_ID, "\\*"))
+
+pitclnic <- ac_id_icf %>% filter(!str_detect(PIT_ID, "\\*"))
+pitclnrc <- ac_id_rcf %>% filter(!str_detect(PIT_ID, "\\*"))
+
+
+## System ----
+
+system_ic <- pitclnic %>% 
+  mutate(System = ifelse(Encounter_Easting < 496000, "Kennebec", "Penobscot"),
+         Species = case_when(Species == "AST" ~ "Atlantic Sturgeon",
+                             Species == "SNS" ~ "Shortnose Sturgeon",
+                             .default = Species))
+
+system_rc <- pitclnrc %>% 
+  mutate(System = ifelse(Encounter_Easting < 496000, "Kennebec", "Penobscot"),
+         Species = case_when(Species == "AST" ~ "Atlantic Sturgeon",
+                             Species == "SNS" ~ "Shortnose Sturgeon",
+                             .default = Species))
+
+## EVENT ----
+
+system_rcnt <- system_rc %>% 
+  mutate(Event = if_else( !is.na(Acoustic_ID) & 
+                             !(Acoustic_ID %in% unique(system_ic$Acoustic_ID)), 
+                           "New Tag", Event ),
+          Observed_Acoustic_ID = ifelse(Event == "Recapture", Acoustic_ID, NA_character_),
+          Observed_PIT_ID = PIT_ID)
 
 
 # Compare to Tidbits ----
@@ -1209,27 +1290,34 @@ tidhst <- rbind(tidASThst, tidSNShst) %>%
            Event == "Recapture (PIT tag)" | 
            Event == "Recapture (Acoustic tag)" | 
            Event == "Initial Capture/Release (Visual tag)" | 
-           Event == "Recapture (Visual tag)")
-
-tid0612 <- tidhst %>% 
-  filter(Event == "Initial Capture/Release (PIT tag)" | 
-           Event == "Initial Capture/Release (PIT tag)" | 
-           Event == "Recapture (PIT tag)" | 
-           Event == "Recapture (Acoustic tag)" | 
-           Event == "Initial Capture/Release (Visual tag)" | 
            Event == "Recapture (Visual tag)") %>% 
-  mutate(Period = as.Date(Period), 
-         Year = year(Period)) %>% 
-  filter(Year < 2013) %>% 
-  dplyr::select(-Year)
+  mutate(Period = ymd_hms(Period))
 
+tidPIT <- tidhst %>% 
+  filter(tagtype == 'PIT')
 
+tidevent <- tidPIT[,c("Period", "TagId")]
 
+glimpse(tidevent)
+glimpse(system_ic)
 
+unq_umaineic <- system_ic %>% 
+  anti_join( tidevent, by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
 
+unq_umainercnt <- system_rcnt %>% 
+  anti_join( tidevent, by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
 
+match_tidic <- system_ic %>% inner_join( tidevent, 
+                                         by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
 
+match_tidrc <- system_rcnt %>% inner_join( tidevent, 
+                                         by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
 
+write.csv(unq_umaineic, file.path(gdrive_path, "output/newUEFic.csv"),
+                    row.names = FALSE, na = "")
+
+write.csv(unq_umainercnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
+          row.names = FALSE, na = "")
 
 
 
