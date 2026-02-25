@@ -33,7 +33,7 @@ glimpse(um2006)
 unique(um2006$`US Northing`)
 unique(um2006$`US Easting`) 
 
-tagid_cols0610 <- c("PIT ID", "Carlin ID", "Coded Type", "Cont. Type")
+tagid_cols0610 <- c("PIT ID", "Coded Type", "Cont. Type")
 
 um2006cln <- um2006 %>%
   filter(!(!is.na(`Coded Type`) & !is.na(`Cont. Type`))) %>% 
@@ -46,7 +46,7 @@ um2006cln <- um2006 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) | !is.na(`Cont. Type`) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+#      !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None"
     )
@@ -125,7 +125,7 @@ um2007cln <- um2007 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) | !is.na(`Cont. Type`) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+#      !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None"
     )
@@ -216,7 +216,7 @@ um2008cln <- rbind(um2008en, um2008ll) %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) | !is.na(`Cont. Type`) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+ #     !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None"
     )
@@ -303,7 +303,7 @@ um2009cln <- um2009 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) | !is.na(`Cont. Type`) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+#      !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None"
     )
@@ -370,7 +370,7 @@ um2010cln <- um2010 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) | !is.na(`Cont. Type`) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+#      !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None"
     )
@@ -414,7 +414,7 @@ um_enc2010rc <- tidsheet_rc(um2010rc, Species = Species, River = NA_character_, 
 
 ## 2011 ----
 
-tagid_cols2011 <- c("PIT ID", "Carlin ID", "Coded Type")
+tagid_cols2011 <- c("PIT ID", "Coded Type")
 
 unique(um2011$`US Northing`)
 unique(um2011$`US Easting`)
@@ -428,7 +428,7 @@ um2011cln <- um2011 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+ #     !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -472,7 +472,7 @@ um_enc2011rc <- tidsheet_rc(um2011rc, Species = Species, River = NA_character_, 
 
 ## 2012 ---- 
 
-tagid_cols2012 <- c("PIT ID", "Carlin ID", "Coded Type")
+tagid_cols2012 <- c("PIT ID", "Coded Type")
 
 unique(um2012$`US Northing`)
 unique(um2012$`US Easting`) ## tough one
@@ -512,7 +512,7 @@ um2012cln <- bind_rows(um2012ll, um2012en) %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+ #     !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -558,7 +558,7 @@ um_enc2012rc <- tidsheet_rc(um2012rc, Species = Species, River = NA_character_, 
 ## 2013 ----
 
 
-tagid_cols2013 <- c("PIT ID", "Carlin ID", "Code") ## no tag type 
+tagid_cols2013 <- c("PIT ID", "Code") ## no tag type 
 
 um2013cln <- um2013 %>%
   mutate(
@@ -582,7 +582,7 @@ um2013cln <- um2013 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+#      !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -626,7 +626,7 @@ um_enc2013rc <- tidsheet_rc(um2013rc, Species = Species, River = NA_character_, 
 
 ## 2014 ----
 
-tagid_cols2014 <- c("PIT ID", "Carlin ID", "Code") ## No tag type
+tagid_cols2014 <- c("PIT ID",  "Code") ## No tag type
 
 glimpse(um2014)
 
@@ -652,7 +652,7 @@ um2014cln <- um2014 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`Carlin ID`) ~ "Carlin",
+   #   !is.na(`Carlin ID`) ~ "Carlin",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -695,7 +695,7 @@ um_enc2014rc <- tidsheet_rc(um2014rc, Species = Species, River = NA_character_, 
 
 ## 2015 ---- 
 
-tagid_cols2015 <- c("PIT ID", "External Tag", "Code") ## No tag type excep where it is omfg jpigaehoi'grsiOHGOHi;EHGOW
+tagid_cols2015 <- c("PIT ID", "Code") ## No tag type excep where it is omfg jpigaehoi'grsiOHGOHi;EHGOW
 
 glimpse(um2015)
 
@@ -722,7 +722,7 @@ um2015cln <- um2015 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`External Tag`) ~ "External",
+  #    !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -769,7 +769,7 @@ um_enc2015rc <- tidsheet_rc(um2015rc, Species = Species, River = NA_character_, 
 
 glimpse(um2016)
 
-tagid_cols2016 <- c("PIT ID", "External Tag", "Code") 
+tagid_cols2016 <- c("PIT ID",  "Code") 
 
 unique(um2016$`US LAT`)
 unique(um2016$`US LONG`)  
@@ -793,7 +793,7 @@ um2016cln <- um2016 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`External Tag`) ~ "External",
+#      !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -850,7 +850,7 @@ um_enc2016rc <- tidsheet_rc(um2016rc, Species = Species, River = NA_character_, 
 
 glimpse(um2017) # some dmm some easting northing
 
-tagid_cols2017 <- c("PIT ID", "External Tag", "Code") 
+tagid_cols2017 <- c("PIT ID", "Code") 
 
 unique(um2017$`US LAT`)
 unique(um2017$`US LONG`)  
@@ -881,7 +881,7 @@ um2017cln <- rbind(um2017en, um2017ll) %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`External Tag`) ~ "External",
+#      !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -943,7 +943,7 @@ um_enc2017rc <- tidsheet_rc(um2017rc, Species = Species, River = NA_character_, 
 
 glimpse(um2018) 
 
-tagid_cols2018 <- c("PIT ID", "External Tag", "Code") 
+tagid_cols2018 <- c("PIT ID",  "Code") 
 
 unique(um2018$`US Northing`)
 unique(um2018$`US Easting`)  
@@ -955,7 +955,7 @@ um2018cln <- um2018 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`External Tag`) ~ "External",
+ #     !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -1001,7 +1001,7 @@ um_enc2018rc <- tidsheet_rc(um2018rc, Species = Species, River = NA_character_, 
 
 glimpse(um2019) 
 
-tagid_cols2019 <- c("PIT ID", "External Tag", "Code") 
+tagid_cols2019 <- c("PIT ID",  "Code") 
 
 unique(um2019$`US Northing`) ## this is bad
 unique(um2019$`US Easting`)  ## how?
@@ -1039,7 +1039,7 @@ um2019cln <- um2019 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`External Tag`) ~ "External",
+ #     !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -1084,7 +1084,7 @@ um_enc2019rc <- tidsheet_rc(um2019rc, Species = Species, River = NA_character_, 
 
 glimpse(um2020) 
 
-tagid_cols2020 <- c("PIT ID", "External Tag", "Code") 
+tagid_cols2020 <- c("PIT ID", "Code") 
 
 unique(um2020$`US Northing`)
 unique(um2020$`US Easting`)  ## good things do happen sometimes
@@ -1096,7 +1096,7 @@ um2020cln <- um2020 %>%
     tagtype = case_when(
       n_ids > 1 ~ "Multiple",
       !is.na(Code) ~ "Acoustic",
-      !is.na(`External Tag`) ~ "External",
+   #   !is.na(`External Tag`) ~ "External",
       !is.na(`PIT ID`) ~ "PIT",
       TRUE ~ "None")) %>%
   dplyr::select(-n_ids) %>%
@@ -1142,8 +1142,6 @@ um_enc_combinedic <- bind_rows(um_enc2006ic, um_enc2007ic, um_enc2008ic, um_enc2
                                um_enc2014ic, um_enc2015ic, um_enc2016ic, um_enc2017ic,
                                um_enc2018ic, um_enc2019ic, um_enc2020ic) 
 
-um_enc_combineddup <- um_enc_combinedic[c(107, 108),]
-glimpse(um_enc_combineddup)
 
 glimpse(um_enc_combinedic)
 
@@ -1286,7 +1284,7 @@ system_rcnt <- system_rc %>%
 
 tidhst <- rbind(tidASThst, tidSNShst) %>% 
   filter(Event == "Initial Capture/Release (PIT tag)" | 
-           Event == "Initial Capture/Release (PIT tag)" | 
+           Event == "Initial Capture/Release (Acoustic tag)" | 
            Event == "Recapture (PIT tag)" | 
            Event == "Recapture (Acoustic tag)" | 
            Event == "Initial Capture/Release (Visual tag)" | 
@@ -1296,27 +1294,65 @@ tidhst <- rbind(tidASThst, tidSNShst) %>%
 tidPIT <- tidhst %>% 
   filter(tagtype == 'PIT')
 
-tidevent <- tidPIT[,c("Period", "TagId")]
+system_pit <- c(system_ic$PIT_ID, system_rcnt$PIT_ID) %>% 
+  unique()
+
+tidpit <- tidPIT$TagId %>% 
+  unique()
+
+system_pit <- data.frame(PIT_ID = unique(c(system_ic$PIT_ID, system_rcnt$PIT_ID)))
+tidpit <- data.frame(PIT_ID = unique(tidPIT$TagId))
+
+new_pit <- anti_join(system_pit, tidpit, by = "PIT_ID")
+
+
+new_pit <- setdiff(system_pit$PIT_ID, tidpit$PIT_ID)
+
+
+new_pitic <- system_ic %>% 
+  filter(PIT_ID %in% new_pit)
+
+new_pitrcnt <- system_rcnt %>% 
+  filter(PIT_ID %in% new_pit)
+
+system_rcnt %>% 
+  summarise(n_distinct(PIT_ID))
+
+tidPIT %>% 
+  summarise(n_distinct(TagId))
+
+tidevent <- tidhst %>% 
+  mutate(date = format(Period, "%Y-%m-%d"))
 
 glimpse(tidevent)
 glimpse(system_ic)
 
+by <- join_by(date, PIT_ID == TagId)
+
 unq_umaineic <- system_ic %>% 
-  anti_join( tidevent, by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
+  mutate(date = format(Encounter_Timestamp, "%Y-%m-%d")) %>% 
+  anti_join(.,
+    tidevent,
+    by)
+
+
 
 unq_umainercnt <- system_rcnt %>% 
-  anti_join( tidevent, by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
+  mutate(date = format(Encounter_Timestamp, "%Y-%m-%d")) %>% 
+  anti_join(.,
+            tidevent,
+            by)
 
 match_tidic <- system_ic %>% inner_join( tidevent, 
-                                         by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
+                                         by)
 
 match_tidrc <- system_rcnt %>% inner_join( tidevent, 
                                          by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
 
-write.csv(unq_umaineic, file.path(gdrive_path, "output/newUEFic.csv"),
+write.csv(new_pitic, file.path(gdrive_path, "output/newUEFic.csv"),
                     row.names = FALSE, na = "")
 
-write.csv(unq_umainercnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
+write.csv(new_pitrcnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
           row.names = FALSE, na = "")
 
 
