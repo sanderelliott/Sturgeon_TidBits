@@ -1343,17 +1343,33 @@ unq_umainercnt <- system_rcnt %>%
             tidevent,
             by)
 
-match_tidic <- system_ic %>% inner_join( tidevent, 
-                                         by)
+match_tidic <- system_ic %>% 
+  mutate(date = format(Encounter_Timestamp, "%Y-%m-%d")) %>%
+  inner_join( tidevent, by)
 
-match_tidrc <- system_rcnt %>% inner_join( tidevent, 
-                                         by = c("Encounter_Timestamp" = "Period", "PIT_ID" = "TagId") )
+match_tidrc <- system_rcnt %>% 
+  mutate(date = format(Encounter_Timestamp, "%Y-%m-%d")) %>%
+  inner_join( tidevent, by)
 
-write.csv(new_pitic, file.path(gdrive_path, "output/newUEFic.csv"),
-                    row.names = FALSE, na = "")
+ic_exids <- match_tidic %>% 
+  filter(Species.x == "Shortnose Sturgeon") %>% 
+  dplyr::select(External_TagID)
 
-write.csv(new_pitrcnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
-          row.names = FALSE, na = "")
+
+rc_exids <- match_tidrc %>% 
+  filter(Species.x == "Shortnose Sturgeon") %>% 
+  dplyr::select(External_TagID)
+
+exids <- rbind(ic_exids, rc_exids) %>% 
+  filter(! is.na(External_TagID)) %>% 
+  summarise(n_distinct(External_TagID))
+
+
+#write.csv(new_pitic, file.path(gdrive_path, "output/newUEFic.csv"),
+#                    row.names = FALSE, na = "")
+
+#write.csv(new_pitrcnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
+  #        row.names = FALSE, na = "")
 
 
 
