@@ -85,8 +85,8 @@ write.csv(tid.cln, "OTN sheet/data/tid.cln.csv", row.names = FALSE, na = "")
 ## Lat Long
 
 tid.cln <- tid.cln %>%
-  st_as_sf(coords = c("Easting", "Northing"), crs = 32619) %>%   # UTM Zone 19N (WGS84)
-  st_transform(4326) %>%                                         # convert to lat/long
+  st_as_sf(coords = c("Easting", "Northing"), crs = 32619) %>%   
+  st_transform(4326) %>%                                        
   mutate(
     longitude = st_coordinates(.)[,1],
     latitude  = st_coordinates(.)[,2]
