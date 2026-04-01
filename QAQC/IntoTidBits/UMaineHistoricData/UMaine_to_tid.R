@@ -1365,11 +1365,11 @@ exids <- rbind(ic_exids, rc_exids) %>%
   summarise(n_distinct(External_TagID))
 
 
-#write.csv(new_pitic, file.path(gdrive_path, "output/newUEFic.csv"),
-#                    row.names = FALSE, na = "")
+write.csv(new_pitic, file.path(gdrive_path, "output/newUEFic.csv"),
+                    row.names = FALSE, na = "")
 
-#write.csv(new_pitrcnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
-  #        row.names = FALSE, na = "")
+write.csv(new_pitrcnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
+          row.names = FALSE, na = "")
 
 
 
