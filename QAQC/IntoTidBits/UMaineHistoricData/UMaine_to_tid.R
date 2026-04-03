@@ -1372,4 +1372,7 @@ write.csv(new_pitrcnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
           row.names = FALSE, na = "")
 
 
-
+mult_ac <- rbind(um2006multac, um2007multac, um2008multac, um2009multac)
+write.csv(mult_ac, file.path(gdrive_path, 
+                             "output/legacy.mulitple.acoustic.tag.csv"), 
+          row.names = FALSE, na = "")
