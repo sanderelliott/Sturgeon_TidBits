@@ -5,6 +5,23 @@
 library(readr)
 library(readxl)
 
+# PATHS ----
+
+## Home
+
+#  gdrive_base <- "C:/Users/sande/My Drive (sander.elliott@maine.edu)"
+
+## Work
+
+gdrive_base <- "C:/Users/sander.elliott/My Drive (sander.elliott@maine.edu)"
+
+
+#gdrive_base <- c("G:/My Drive", "H:/My Drive")
+#gdrive_base <- gdrive_base[file.exists(gdrive_base)][1]
+
+gdrive_path <- file.path(gdrive_base, "Code", "Sturgeon_TidBits", "QAQC", "IntoTidBits", "UMaineHistoricData")
+
+
 # Load Data ----
 
 ## UMaine data
@@ -40,35 +57,23 @@ um2019 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture
 um2020 <- read_excel("QAQC/IntoTidBits/UMaineHistoricData/data/Penobscot Capture Data 2006 - 2020.xlsx", sheet = 15,
                      na = c("", "none", "None", "NONE", " ", "NA", "N/A"))
 
-## Read in example encounter forms
+## Read in example encounter forms ----
 
 encexic <- read.csv("QAQC/IntoTidBits/Encounter Forms/2025/output/UEF_IC_AST_SNS_SE.csv")
 encexrcnt <- read.csv("QAQC/IntoTidBits/Encounter Forms/2025/output/UEF_RCNT_AST_SNS_SE.csv")
 
 
-## Read in example history
+## Read in example tidbits ----
 
 tidSNShst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_SNShist_allyrs.csv")
 tidASThst <- read.csv("QAQC/IntoTidBits/UMaineHistoricData/data/tid_ASThist_allyrs.csv")
 
-## Read in Acoustic IDs
+tid_ast_ac_fsh <- read.csv(file.path(gdrive_path, "data/ast.ac.fsh.csv"))
+tid_sns_ac_fsh <- read.csv(file.path(gdrive_path, "data/sns.ac.fsh.csv"))
 
+tid_ast_ac_tag <- read.csv(file.path(gdrive_path, "data/ast.ac.tag.csv"))
+tid_sns_ac_tag <- read.csv(file.path(gdrive_path, "data/sns.ac.tag.csv"))
 
-# PATHS ----
-
-## Home
-
-  gdrive_base <- "C:/Users/sande/My Drive (sander.elliott@maine.edu)"
-
-## Work
-
- # gdrive_base <- "C:/Users/sander.elliott/My Drive (sander.elliott@maine.edu)"
-
-
-#gdrive_base <- c("G:/My Drive", "H:/My Drive")
-#gdrive_base <- gdrive_base[file.exists(gdrive_base)][1]
-
-gdrive_path <- file.path(gdrive_base, "Code", "Sturgeon_TidBits", "QAQC", "IntoTidBits", "UMaineHistoricData")
 
 # FUNCTIONS ----
 

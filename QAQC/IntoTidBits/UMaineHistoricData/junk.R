@@ -87,5 +87,35 @@ um_enc0610rc <- tidsheet_rc(bin0610rc, Species = Species, River = NA_character_,
 
 ## NEED TO WORK OUT EVENT AND OBSERVED TAGS DOWN ROAD WHEN ALL TOGETHER FOR FISH HISTORY ##
 
+## AC in tid not in UMAINE 
+tid_ac_fsh <- rbind(tid_ast_ac_fsh, tid_sns_ac_fsh)
+glimpse(tid_ac_fsh)
 
+tid_ac_tag <- rbind(tid_ast_ac_tag, tid_sns_ac_tag)
+glimpse(tid_ac_tag)
 
+ac_ic <- um_enc_combinedic %>% 
+  filter(
+    PIT_ID %in% tid_ac_tag$PITIDNo
+  )
+glimpse(ac_ic)
+
+ac_rc <- um_enc_combinedrc %>% 
+  filter(
+    PIT_ID %in% tid_ac_tag$PITIDNo
+  )
+glimpse(ac_rc)
+
+miss_ac_ic <- ac_ic %>% 
+  filter(is.na(Acoustic_ID))
+glimpse(miss_ac_ic)
+
+miss_ac_rc <- ac_rc %>% 
+  filter(is.na(Acoustic_ID))
+glimpse(miss_ac_rc)
+
+tid_miss_ac <- tid_ac_tag %>% 
+  filter(PITIDNo %in% miss_ac_ic$PIT_ID |
+           PITIDNo %in% miss_ac_rc$PIT_ID
+  )
+glimpse(tid_miss_ac)

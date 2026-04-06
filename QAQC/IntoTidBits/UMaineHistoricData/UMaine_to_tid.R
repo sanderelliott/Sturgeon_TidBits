@@ -7,10 +7,8 @@ getwd()
 #install.packages("tidyr")
 #install.packages("lubridate")
 
-library(dplyr)
+library(tidyverse)
 library(stringr)
-library(tidyr)
-library(lubridate)
 library(sf)
 
 
@@ -1169,6 +1167,51 @@ glimpse(um_enc_combinedrc)
 
 # Tag info ----
 
+## PIT tags of acoustic tagged fish ----
+
+tid_ac_fsh <- rbind(tid_ast_ac_fsh, tid_sns_ac_fsh)
+glimpse(tid_ac_fsh)
+
+tid_ac_tag <- rbind(tid_ast_ac_tag, tid_sns_ac_tag)
+glimpse(tid_ac_tag)
+
+ac_ic <- um_enc_combinedic %>% 
+  filter(
+    !is.na(Acoustic_ID)
+  )
+glimpse(ac_ic)
+
+ac_rc <- um_enc_combinedrc %>% 
+  filter(
+    !is.na(Acoustic_ID) | !is.na(Observed_Acoustic_ID)
+  )
+glimpse(ac_rc)
+
+miss_ac_ic <- ac_ic %>% 
+  filter(!PIT_ID %in% tid_ac_tag$PITIDNo)
+glimpse(miss_ac_ic)
+
+miss_ac_rc <- ac_rc %>% 
+  filter(!PIT_ID %in% tid_ac_tag$PITIDNo)
+glimpse(miss_ac_rc)
+
+tid_miss_ac <- tidhst %>% ###HERE
+  filter(PITIDNo %in% miss_ac_ic$PIT_ID |
+           PITIDNo %in% miss_ac_rc$PIT_ID
+         )
+glimpse(tid_miss_ac)
+
+write.csv(miss_ac_ic, file.path(gdrive_path, "output/newUEFic.csv"),
+          row.names = FALSE, na = "")
+
+write.csv(miss_ac_rc, file.path(gdrive_path, "output/miss_ac_rc.csv"),
+          row.names = FALSE, na = "")
+
+write.csv(tid_miss_ac, file.path(gdrive_path, "output/tid_miss_ac.csv"),
+          row.names = FALSE, na = "")
+
+
+
 ## Get tag codes ----
 
 icIDs <- um_enc_combinedic %>% 
@@ -1236,7 +1279,6 @@ ac_id_rc <- um_enc_combinedrc %>%
     Acoustic_ID = AcousticID,
     Acoustic_Sensor_type = SensorType)
 ac_id_rcf <- ac_id_rc[,1:48]
-
 
 
 problem_ids_rc <- um_enc_combinedrc %>% 
@@ -1376,3 +1418,17 @@ mult_ac <- rbind(um2006multac, um2007multac, um2008multac, um2009multac)
 write.csv(mult_ac, file.path(gdrive_path, 
                              "output/legacy.mulitple.acoustic.tag.csv"), 
           row.names = FALSE, na = "")
+
+glimpse(system_ic)
+
+  
+
+
+
+
+
+
+
+
+
+
