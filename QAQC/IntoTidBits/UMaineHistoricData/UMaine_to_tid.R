@@ -1172,6 +1172,9 @@ glimpse(um_enc_combinedrc)
 tid_ac_fsh <- rbind(tid_ast_ac_fsh, tid_sns_ac_fsh)
 glimpse(tid_ac_fsh)
 
+tid_fsh <- rbind(tid_ast_fsh, tid_sns_fsh)
+glimpse(tid_fsh)
+
 tid_ac_tag <- rbind(tid_ast_ac_tag, tid_sns_ac_tag)
 glimpse(tid_ac_tag)
 
@@ -1195,13 +1198,28 @@ miss_ac_rc <- ac_rc %>%
   filter(!PIT_ID %in% tid_ac_tag$PITIDNo)
 glimpse(miss_ac_rc)
 
-tid_miss_ac <- tidhst %>% ###HERE
-  filter(PITIDNo %in% miss_ac_ic$PIT_ID |
-           PITIDNo %in% miss_ac_rc$PIT_ID
+pit_tid_miss_ac <- tid_fsh %>% 
+  filter(TagID %in% miss_ac_ic$PIT_ID |
+           TagID %in% miss_ac_rc$PIT_ID
+  )
+
+tid_miss_ac <- tid_fsh %>% 
+  filter(FishID %in% pit_tid_miss_ac$FishID
          )
 glimpse(tid_miss_ac)
 
-write.csv(miss_ac_ic, file.path(gdrive_path, "output/newUEFic.csv"),
+length(unique(tid_miss_ac$FishID))
+
+mult_ac <- rbind(um2006multac, um2007multac, um2008multac, um2009multac)
+
+
+pit_tid_mult_ac <- tid_fsh %>% 
+  filter(TagID %in% mult_ac$`PIT ID`)
+
+tid_mult_ac <- tid_fsh %>% 
+  filter(FishID %in% pit_tid_mult_ac$FishID)
+
+write.csv(miss_ac_ic, file.path(gdrive_path, "output/miss_ac_ic.csv"),
           row.names = FALSE, na = "")
 
 write.csv(miss_ac_rc, file.path(gdrive_path, "output/miss_ac_rc.csv"),
@@ -1210,6 +1228,13 @@ write.csv(miss_ac_rc, file.path(gdrive_path, "output/miss_ac_rc.csv"),
 write.csv(tid_miss_ac, file.path(gdrive_path, "output/tid_miss_ac.csv"),
           row.names = FALSE, na = "")
 
+write.csv(mult_ac, file.path(gdrive_path, 
+                             "output/legacy.mulitple.acoustic.tag.csv"), 
+          row.names = FALSE, na = "")
+
+write.csv(tid_mult_ac, file.path(gdrive_path, 
+                             "output/tidbits.mulitple.acoustic.tag.csv"), 
+          row.names = FALSE, na = "")
 
 
 ## Get tag codes ----
@@ -1413,11 +1438,6 @@ write.csv(new_pitic, file.path(gdrive_path, "output/newUEFic.csv"),
 write.csv(new_pitrcnt, file.path(gdrive_path, "output/newUEFrcnt.csv"),
           row.names = FALSE, na = "")
 
-
-mult_ac <- rbind(um2006multac, um2007multac, um2008multac, um2009multac)
-write.csv(mult_ac, file.path(gdrive_path, 
-                             "output/legacy.mulitple.acoustic.tag.csv"), 
-          row.names = FALSE, na = "")
 
 glimpse(system_ic)
 

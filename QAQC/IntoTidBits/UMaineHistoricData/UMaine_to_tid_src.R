@@ -74,6 +74,8 @@ tid_sns_ac_fsh <- read.csv(file.path(gdrive_path, "data/sns.ac.fsh.csv"))
 tid_ast_ac_tag <- read.csv(file.path(gdrive_path, "data/ast.ac.tag.csv"))
 tid_sns_ac_tag <- read.csv(file.path(gdrive_path, "data/sns.ac.tag.csv"))
 
+tid_sns_fsh <- read.csv(file.path(gdrive_path, "data/sns.fsh.csv"))
+tid_ast_fsh <- read.csv(file.path(gdrive_path, "data/ast.fsh.csv"))
 
 # FUNCTIONS ----
 
